@@ -90,7 +90,7 @@ export function RoleEntry() {
                 return (
                   <Link
                     key={role.key}
-                    href={`/login?role=${role.key}`}
+                    href={`/auth/login`}
                     className="group flex items-center gap-5 rounded-2xl border border-border bg-card p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4 sm:p-6"
                   >
                     <div className="flex size-14 shrink-0 items-center justify-center rounded-xl bg-secondary text-primary transition-colors group-hover:bg-accent">
