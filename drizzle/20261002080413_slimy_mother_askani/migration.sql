@@ -1,0 +1,1 @@
+ALTER TABLE "learning_areas" DROP COLUMN "parent_id";

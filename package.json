@@ -6,7 +6,12 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "db:seed": "tsx src/db/scripts/generate-seeds.ts && tsx src/db/scripts/reset.ts && tsx src/db/seed.ts",
+    "db:generate": "tsx src/db/scripts/generate-schemas.ts && drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:studio": "drizzle-kit studio",
+    "knip": "knip"
   },
   "dependencies": {
     "@base-ui/react": "^1.7.0",
@@ -15,8 +20,11 @@
     "@vercel/analytics": "^2.0.1",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "dotenv": "^18.0.5",
+    "drizzle-orm": "1.0.0-rc.4",
     "lucide-react": "^1.31.0",
     "next": "16.3.0",
+    "postgres": "^3.4.9",
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "shadcn": "^4.17.0",
@@ -28,9 +36,11 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "drizzle-kit": "1.0.0-rc.4",
     "eslint": "^9",
     "eslint-config-next": "16.3.0",
     "tailwindcss": "^4",
+    "tsx": "^4.23.15",
     "typescript": "^5"
   },
   "packageManager": "pnpm@10.11.1"

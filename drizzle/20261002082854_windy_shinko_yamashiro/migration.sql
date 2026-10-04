@@ -1,0 +1,2 @@
+CREATE TYPE "assessment_type" AS ENUM('Classroom Assessment', 'School Based Assessment', 'National Examinations');--> statement-breakpoint
+ALTER TABLE "assessments" ALTER COLUMN "assessment_type" SET DATA TYPE "assessment_type" USING "assessment_type"::"assessment_type";
