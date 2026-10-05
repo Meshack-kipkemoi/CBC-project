@@ -1,74 +1,164 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
-  ArrowUpRight,
+  BarChart3,
   Bell,
-  CheckCircle2,
+  BookOpen,
   ClipboardList,
-  Filter,
   LayoutDashboard,
-  Search,
   Sparkles,
+  TrendingUp,
   Users,
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 
-const learners = [
-  {
-    name: "Amani Mwangi",
-    initials: "AM",
-    subject: "Mathematics",
-    level: "High priority",
-    score: "42%",
-    reason: "Fractions and measurement",
-    action: "Small-group practice",
-    last: "3 days ago",
-  },
-  {
-    name: "Cynthia Wanjiru",
-    initials: "CW",
-    subject: "English",
-    level: "High priority",
-    score: "45%",
-    reason: "Reading comprehension",
-    action: "Guided reading",
-    last: "5 days ago",
-  },
-  {
-    name: "Baraka Kiptoo",
-    initials: "BK",
-    subject: "Mathematics",
-    level: "Monitor",
-    score: "58%",
-    reason: "Problem-solving fluency",
-    action: "Weekly check-in",
-    last: "1 week ago",
-  },
-  {
-    name: "Esther Otieno",
-    initials: "EO",
-    subject: "Social Studies",
-    level: "Monitor",
-    score: "61%",
-    reason: "Written explanations",
-    action: "Writing scaffold",
-    last: "1 week ago",
-  },
-];
+/* -------------------------------------------------------------------------- */
+/*  Types – these mirror the JSON returned by GET /api/analytics              */
+/* -------------------------------------------------------------------------- */
+type Tone = "good" | "watch" | "warning";
 
-export default function InterventionsPage() {
-  const [query, setQuery] = useState("");
-  const filtered = useMemo(
-    () =>
-      learners.filter((item) =>
-        `${item.name} ${item.subject}`
-          .toLowerCase()
-          .includes(query.toLowerCase()),
-      ),
-    [query],
+type AnalyticsData = {
+  date: string;
+  teacher: { fullName: string; initials: string };
+  class: {
+    streamId: string;
+    streamName: string | null;
+    gradeName: string | null;
+    academicYear: string;
+    termNumber: number | null;
+  };
+  metrics: {
+    classAverage: number | null;
+    changeFromLastTerm: number | null;
+    learnersAssessed: { assessed: number; total: number; coverage: number };
+    strongestArea: { name: string; average: number } | null;
+    growth: { value: number; label: string } | null;
+  };
+  subjects: { name: string; score: number; tone: Tone }[];
+  progression: { label: string; name: string; value: number }[];
+  classSignal: string;
+  insight: {
+    headline: string;
+    body: string;
+    focusAreas: string[];
+  } | null;
+};
+
+const TONE_BAR: Record<Tone, string> = {
+  good: "bg-primary",
+  watch: "bg-accent",
+  warning: "bg-destructive/70",
+};
+
+/* -------------------------------------------------------------------------- */
+/*  Helpers                                                                   */
+/* -------------------------------------------------------------------------- */
+const formatPercent = (value: number | null) =>
+  value === null ? "–" : `${value}%`;
+
+function changeText(change: number | null) {
+  if (change === null) return "No previous term to compare";
+  if (change === 0) return "Same as last term";
+  return `${change > 0 ? "Up" : "Down"} ${Math.abs(change)}% from last term`;
+}
+
+function CenteredMessage({
+  title,
+  detail,
+  action,
+}: {
+  title: string;
+  detail?: string;
+  action?: { label: string; onClick: () => void };
+}) {
+  return (
+    <main className="flex min-h-screen items-center justify-center bg-background px-6 text-foreground">
+      <div className="max-w-sm text-center">
+        <h1 className="font-serif text-2xl tracking-tight">{title}</h1>
+        {detail && (
+          <p className="mt-2 text-sm text-muted-foreground">{detail}</p>
+        )}
+        {action && (
+          <button
+            type="button"
+            onClick={action.onClick}
+            className="mt-5 rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground"
+          >
+            {action.label}
+          </button>
+        )}
+      </div>
+    </main>
   );
+}
+
+/* -------------------------------------------------------------------------- */
+/*  Page                                                                      */
+/* -------------------------------------------------------------------------- */
+export default function AnalyticsPage() {
+  const router = useRouter();
+  const [data, setData] = useState<AnalyticsData | null>(null);
+  const [status, setStatus] = useState<"loading" | "ready" | "error">(
+    "loading",
+  );
+  const [error, setError] = useState("");
+  const [reloadKey, setReloadKey] = useState(0);
+
+  // Load the analytics from the API
+  useEffect(() => {
+    const controller = new AbortController();
+    setStatus("loading");
+
+    fetch("/api/analytics", { signal: controller.signal })
+      .then(async (res) => {
+        if (res.status === 401) {
+          router.replace("/login");
+          return;
+        }
+        const body = await res.json();
+        if (!res.ok) {
+          throw new Error(body?.error ?? "Could not load analytics.");
+        }
+        setData(body as AnalyticsData);
+        setStatus("ready");
+      })
+      .catch((err: Error) => {
+        if (err.name === "AbortError") return;
+        setError(err.message);
+        setStatus("error");
+      });
+
+    return () => controller.abort();
+  }, [reloadKey, router]);
+
+  if (status === "loading") {
+    return <CenteredMessage title="Loading analytics…" />;
+  }
+
+  if (status === "error" || !data) {
+    return (
+      <CenteredMessage
+        title="We couldn't load analytics"
+        detail={error}
+        action={{ label: "Try again", onClick: () => setReloadKey((k) => k + 1) }}
+      />
+    );
+  }
+
+  const { metrics, subjects, progression, insight, teacher } = data;
+
+  const classLabel = [
+    [data.class.gradeName, data.class.streamName].filter(Boolean).join(" "),
+    data.class.termNumber ? `Term ${data.class.termNumber}` : "",
+  ]
+    .filter(Boolean)
+    .join(" · ");
+
+  const growthValue = metrics.growth?.value ?? null;
+
   return (
     <main className="min-h-screen bg-background text-foreground">
       <div className="flex min-h-screen flex-col lg:flex-row">
@@ -96,20 +186,21 @@ export default function InterventionsPage() {
             </Link>
             <Link
               href="/teacher/interventions"
-              className="flex items-center gap-3 rounded-xl bg-primary-foreground/12 px-3 py-3 text-sm font-semibold"
+              className="flex items-center gap-3 rounded-xl px-3 py-3 text-sm text-primary-foreground/60 hover:bg-primary-foreground/8"
             >
               <ClipboardList className="size-4" />
               Interventions
             </Link>
             <Link
               href="/teacher/analytics"
-              className="flex items-center gap-3 rounded-xl px-3 py-3 text-sm text-primary-foreground/60 hover:bg-primary-foreground/8"
+              className="flex items-center gap-3 rounded-xl bg-primary-foreground/12 px-3 py-3 text-sm font-semibold"
             >
-              <Users className="size-4" />
+              <BarChart3 className="size-4" />
               Analytics
             </Link>
           </nav>
         </aside>
+
         <section className="min-w-0 flex-1">
           <header className="flex items-center justify-between border-b border-border px-5 py-5 sm:px-8 lg:px-10">
             <div>
@@ -121,113 +212,186 @@ export default function InterventionsPage() {
                 Back to dashboard
               </Link>
               <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
-                Teacher workspace
+                {classLabel || "Teacher workspace"}
               </p>
               <h1 className="mt-2 font-serif text-3xl tracking-tight">
-                Interventions
+                Class analytics
               </h1>
             </div>
             <div className="flex items-center gap-3">
               <Bell className="size-4 text-muted-foreground" />
               <div className="flex size-10 items-center justify-center rounded-full bg-accent font-semibold text-accent-foreground">
-                MA
+                {teacher.initials}
               </div>
             </div>
           </header>
+
           <div className="mx-auto flex max-w-[1200px] flex-col gap-7 px-5 py-7 sm:px-8 lg:px-10">
-            <div className="grid gap-4 sm:grid-cols-3">
+            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+              <div className="rounded-2xl border border-border bg-card p-5">
+                <p className="text-sm text-muted-foreground">Class average</p>
+                <p className="mt-3 font-serif text-3xl">
+                  {formatPercent(metrics.classAverage)}
+                </p>
+                {metrics.changeFromLastTerm === null ? (
+                  <p className="mt-2 text-xs text-muted-foreground">
+                    {changeText(null)}
+                  </p>
+                ) : (
+                  <p className="mt-2 flex items-center gap-1 text-xs text-primary">
+                    <TrendingUp className="size-3.5" />
+                    {changeText(metrics.changeFromLastTerm)}
+                  </p>
+                )}
+              </div>
               <div className="rounded-2xl border border-border bg-card p-5">
                 <p className="text-sm text-muted-foreground">
-                  Learners needing support
+                  Learners assessed
                 </p>
-                <p className="mt-3 font-serif text-3xl">8</p>
+                <p className="mt-3 font-serif text-3xl">
+                  {metrics.learnersAssessed.assessed} /{" "}
+                  {metrics.learnersAssessed.total}
+                </p>
                 <p className="mt-2 text-xs text-muted-foreground">
-                  Across 4 learning areas
+                  {metrics.learnersAssessed.coverage}% assessment coverage
                 </p>
               </div>
               <div className="rounded-2xl border border-border bg-card p-5">
-                <p className="text-sm text-muted-foreground">High priority</p>
-                <p className="mt-3 font-serif text-3xl text-destructive">2</p>
+                <p className="text-sm text-muted-foreground">Strongest area</p>
+                <p className="mt-3 font-serif text-3xl">
+                  {metrics.strongestArea?.name ?? "–"}
+                </p>
                 <p className="mt-2 text-xs text-muted-foreground">
-                  Review this week
+                  {metrics.strongestArea
+                    ? `${metrics.strongestArea.average}% class average`
+                    : "No results yet"}
                 </p>
               </div>
               <div className="rounded-2xl border border-border bg-card p-5">
                 <p className="text-sm text-muted-foreground">
-                  Improving after support
+                  Growth this term
                 </p>
-                <p className="mt-3 font-serif text-3xl">5</p>
+                <p className="mt-3 font-serif text-3xl">
+                  {growthValue === null
+                    ? "–"
+                    : `${growthValue > 0 ? "+" : ""}${growthValue}%`}
+                </p>
                 <p className="mt-2 text-xs text-muted-foreground">
-                  Positive response signal
+                  {metrics.growth?.label ?? "Needs at least two assessments"}
                 </p>
               </div>
             </div>
-            <section className="rounded-2xl border border-border bg-card shadow-sm">
-              <div className="flex flex-col gap-4 border-b border-border p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
+
+            <div className="grid gap-7 xl:grid-cols-[1.2fr_0.8fr]">
+              <section className="rounded-2xl border border-border bg-card p-5 shadow-sm sm:p-6">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <h2 className="font-serif text-2xl">
+                      Performance by subject
+                    </h2>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      Current class average across CBC learning areas.
+                    </p>
+                  </div>
+                  <BookOpen className="size-5 text-muted-foreground" />
+                </div>
+                {subjects.length === 0 ? (
+                  <p className="mt-7 rounded-xl border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
+                    Subject averages will appear once assessments are published.
+                  </p>
+                ) : (
+                  <div className="mt-7 flex flex-col gap-5">
+                    {subjects.map((subject) => (
+                      <div key={subject.name}>
+                        <div className="mb-2 flex items-center justify-between text-sm">
+                          <span className="font-medium">{subject.name}</span>
+                          <span className="font-semibold">
+                            {subject.score}%
+                          </span>
+                        </div>
+                        <div className="h-3 overflow-hidden rounded-full bg-secondary">
+                          <div
+                            className={`h-full rounded-full ${TONE_BAR[subject.tone]}`}
+                            style={{ width: `${Math.min(subject.score, 100)}%` }}
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </section>
+
+              <section className="rounded-2xl border border-border bg-card p-5 shadow-sm sm:p-6">
                 <div>
-                  <h2 className="font-serif text-2xl">Learners to follow up</h2>
+                  <h2 className="font-serif text-2xl">Term progression</h2>
                   <p className="mt-1 text-sm text-muted-foreground">
-                    Prioritised from recent assessment evidence and attendance.
+                    Class average over the last {progression.length || "six"}{" "}
+                    assessments.
                   </p>
                 </div>
-                <div className="relative w-full sm:w-64">
-                  <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-                  <input
-                    aria-label="Search learners"
-                    value={query}
-                    onChange={(e) => setQuery(e.target.value)}
-                    placeholder="Search learners"
-                    className="h-10 w-full rounded-xl border border-input bg-background pl-9 pr-3 text-sm outline-none focus:border-primary"
-                  />
-                </div>
-              </div>
-              <div className="divide-y divide-border">
-                {filtered.map((learner) => (
-                  <Link
-                    key={learner.name}
-                    href="/teacher/dashboard"
-                    className="flex flex-col gap-4 px-5 py-5 transition hover:bg-secondary/50 sm:flex-row sm:items-center sm:px-6"
-                  >
-                    <div className="flex size-11 shrink-0 items-center justify-center rounded-full bg-accent/80 text-xs font-bold text-accent-foreground">
-                      {learner.initials}
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <h3 className="font-semibold">{learner.name}</h3>
-                        <span
-                          className={`rounded-full px-2 py-1 text-[10px] font-semibold ${learner.level === "High priority" ? "bg-destructive/10 text-destructive" : "bg-accent/30 text-accent-foreground"}`}
-                        >
-                          {learner.level}
+                {progression.length === 0 ? (
+                  <p className="mt-8 flex h-48 items-center justify-center rounded-xl border border-dashed border-border text-sm text-muted-foreground">
+                    No assessments published this term yet.
+                  </p>
+                ) : (
+                  <div className="mt-8 flex h-48 items-end gap-3 border-b border-border sm:gap-5">
+                    {progression.map((point, index) => (
+                      <div
+                        key={`${point.label}-${index}`}
+                        title={point.name}
+                        className="flex h-full flex-1 flex-col items-center justify-end gap-2"
+                      >
+                        <span className="text-xs font-semibold text-muted-foreground">
+                          {point.value}%
+                        </span>
+                        <div
+                          className="w-full rounded-t-lg bg-primary"
+                          style={{
+                            height: `${point.value * 1.6}px`,
+                            opacity: 0.55 + index * 0.08,
+                          }}
+                        />
+                        <span className="pb-3 text-[11px] text-muted-foreground">
+                          {point.label}
                         </span>
                       </div>
-                      <p className="mt-1 text-sm text-muted-foreground">
-                        {learner.subject} · {learner.reason}
-                      </p>
-                    </div>
-                    <div className="grid grid-cols-2 gap-6 text-sm sm:flex sm:items-center">
-                      <div>
-                        <p className="text-xs text-muted-foreground">
-                          Latest score
-                        </p>
-                        <p className="mt-1 font-semibold">{learner.score}</p>
-                      </div>
-                      <div>
-                        <p className="text-xs text-muted-foreground">
-                          Suggested response
-                        </p>
-                        <p className="mt-1 font-medium">{learner.action}</p>
-                      </div>
-                      <ArrowUpRight className="hidden size-4 text-muted-foreground sm:block" />
-                    </div>
-                  </Link>
-                ))}
+                    ))}
+                  </div>
+                )}
+                <div className="mt-5 rounded-xl bg-secondary/60 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                    Class signal
+                  </p>
+                  <p className="mt-2 text-sm leading-6">{data.classSignal}</p>
+                </div>
+              </section>
+            </div>
+
+            <section className="rounded-2xl border border-border bg-primary p-6 text-primary-foreground shadow-sm">
+              <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <div className="flex items-center gap-2 text-accent">
+                    <Sparkles className="size-4" />
+                    <span className="text-xs font-semibold uppercase tracking-wider">
+                      AI-assisted class insight
+                    </span>
+                  </div>
+                  <h2 className="mt-3 font-serif text-2xl">
+                    {insight?.headline ?? "No learning area needs priority support."}
+                  </h2>
+                  <p className="mt-2 max-w-2xl text-sm leading-6 text-primary-foreground/65">
+                    {insight?.body ??
+                      "No learners are below the support threshold in any learning area this term."}
+                  </p>
+                </div>
+                <Link
+                  href="/teacher/interventions"
+                  className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-accent px-4 py-3 text-sm font-semibold text-accent-foreground"
+                >
+                  View interventions <Users className="size-4" />
+                </Link>
               </div>
             </section>
-            <p className="flex items-center gap-2 text-xs text-muted-foreground">
-              <CheckCircle2 className="size-4 text-primary" />
-              Review each learner&apos;s full profile before recording an
-              intervention.
-            </p>
           </div>
         </section>
       </div>

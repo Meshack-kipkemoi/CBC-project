@@ -4,18 +4,15 @@ import { createClient } from "@/lib/supabase/server";
 export const dynamic = "force-dynamic";
 
 /* -------------------------------------------------------------------------- */
-/*  Tunable rules – keep these in step with app/api/dashboard/route.ts        */
+/*  Tunable rules                                                             */
 /* -------------------------------------------------------------------------- */
-const NEEDS_SUPPORT_BELOW = 50; // weakest-subject average below this => "High priority"
-const WATCH_BELOW = 65; // weakest-subject average below this => "Monitor"
+const NEEDS_SUPPORT_BELOW = 50; // a learner below this in a subject needs support
+const SUBJECT_GOOD_AT = 70; // subject class average at/above this => "good"
+const SUBJECT_WATCH_AT = 60; // at/above this => "watch", below => "warning"
+const PROGRESSION_POINTS = 6; // assessments shown in the term progression chart
+const TREND_DELTA = 2; // change (in % points) needed to call a trend up/down
 
-type Level = "High priority" | "Monitor";
-
-// Suggested response shown for each level (no interventions table exists yet)
-const SUGGESTED_ACTION: Record<Level, string> = {
-  "High priority": "Small-group practice",
-  Monitor: "Weekly check-in",
-};
+type Tone = "good" | "watch" | "warning";
 
 /* -------------------------------------------------------------------------- */
 /*  Types                                                                     */
@@ -79,22 +76,34 @@ function groupBy<T>(items: T[], key: (item: T) => string) {
   return map;
 }
 
-function timeAgo(iso: string) {
-  const days = Math.floor((Date.now() - new Date(iso).getTime()) / 86_400_000);
-  if (days <= 0) return "Today";
-  if (days === 1) return "Yesterday";
-  if (days < 7) return `${days} days ago`;
-  const weeks = Math.floor(days / 7);
-  if (weeks < 5) return weeks === 1 ? "1 week ago" : `${weeks} weeks ago`;
-  const months = Math.floor(days / 30);
-  return months <= 1 ? "1 month ago" : `${months} months ago`;
+/** Average % per student (each student's mean of their own result percentages). */
+function studentAverages(rows: ResultRow[]) {
+  const out = new Map<string, number>();
+  for (const [studentId, studentRows] of groupBy(rows, (r) => r.student_id)) {
+    const avg = mean(studentRows.map(percent));
+    if (avg !== null) out.set(studentId, avg);
+  }
+  return out;
 }
+
+/** Class average = mean of the individual student averages. */
+const classAverage = (rows: ResultRow[]) =>
+  mean([...studentAverages(rows).values()]);
+
+const toneFor = (score: number): Tone =>
+  score >= SUBJECT_GOOD_AT
+    ? "good"
+    : score >= SUBJECT_WATCH_AT
+      ? "watch"
+      : "warning";
+
+const joinNames = (names: string[]) => names.join(" and ");
 
 const fail = (step: string, error: { message: string }) =>
   NextResponse.json({ error: `${step}: ${error.message}` }, { status: 500 });
 
 /* -------------------------------------------------------------------------- */
-/*  GET /api/interventions?stream_id=<optional>                               */
+/*  GET /api/analytics?stream_id=<optional>                                   */
 /* -------------------------------------------------------------------------- */
 export async function GET(request: Request) {
   const supabase = await createClient();
@@ -189,72 +198,132 @@ export async function GET(request: Request) {
     (t) => t.start_date <= today && termIdsWithResults.has(t.id),
   );
   const activeTerm = startedTerms[startedTerms.length - 1] ?? null;
+  const previousTerm = startedTerms[startedTerms.length - 2] ?? null;
 
   const termResults = activeTerm
     ? allResults.filter((r) => r.assessments.term_id === activeTerm.id)
     : [];
-  const termByStudent = groupBy(termResults, (r) => r.student_id);
+  const previousResults = previousTerm
+    ? allResults.filter((r) => r.assessments.term_id === previousTerm.id)
+    : [];
 
-  // 6. One row per learner who is struggling: their weakest learning area this term
-  const rows = [];
+  // 6. Headline metrics
+  const currentAvg = classAverage(termResults);
+  const previousAvg = classAverage(previousResults);
+  const assessed = new Set(termResults.map((r) => r.student_id)).size;
+  const total = students.length;
 
-  for (const student of students) {
-    const studentRows = termByStudent.get(student.id);
-    if (!studentRows) continue;
-
-    const areas = [
-      ...groupBy(studentRows, (r) => r.assessments.learning_area_id).values(),
-    ].map((areaRows) => {
-      const sorted = areaRows
-        .slice()
-        .sort((a, b) =>
-          a.assessments.created_at.localeCompare(b.assessments.created_at),
-        );
-      const scores = sorted.map(percent);
-      const lowestIndex = scores.indexOf(Math.min(...scores));
-
-      return {
-        name: sorted[0].assessments.learning_areas?.name ?? "Unknown",
-        average: mean(scores)!,
-        latestScore: scores[scores.length - 1],
-        previousScore: scores.length > 1 ? scores[scores.length - 2] : null,
-        latestDate: sorted[sorted.length - 1].assessments.created_at,
-        lowestAssessment: sorted[lowestIndex].assessments.name,
-      };
-    });
-
-    const weakest = areas.reduce((a, b) => (b.average < a.average ? b : a));
-    if (weakest.average >= WATCH_BELOW) continue; // doing fine – not listed
-
-    const level: Level =
-      weakest.average < NEEDS_SUPPORT_BELOW ? "High priority" : "Monitor";
-
-    rows.push({
-      id: student.id,
-      name: student.full_name,
-      initials: initialsOf(student.full_name),
-      subject: weakest.name,
-      level,
-      score: `${round(weakest.latestScore)}%`, // latest result in that subject
-      scoreValue: round(weakest.latestScore),
-      average: round(weakest.average), // term average in that subject
-      reason: `Lowest result: ${weakest.lowestAssessment}`,
-      action: SUGGESTED_ACTION[level],
-      last: timeAgo(weakest.latestDate),
-      lastAssessment: weakest.latestDate,
-      improving:
-        weakest.previousScore !== null &&
-        weakest.latestScore > weakest.previousScore,
-    });
-  }
-
-  // High priority first, then lowest latest score first
-  rows.sort((a, b) => {
-    if (a.level !== b.level) return a.level === "High priority" ? -1 : 1;
-    return a.scoreValue - b.scoreValue;
+  // 7. Performance by subject: class average per learning area, best first
+  const areaGroups = [
+    ...groupBy(
+      termResults,
+      (r) => r.assessments.learning_areas?.name ?? "Unknown",
+    ),
+  ].map(([name, rows]) => {
+    const perStudent = [...studentAverages(rows).values()];
+    return {
+      name,
+      average: mean(perStudent)!,
+      belowThreshold: perStudent.filter((avg) => avg < NEEDS_SUPPORT_BELOW)
+        .length,
+      belowStudentIds: [...studentAverages(rows)]
+        .filter(([, avg]) => avg < NEEDS_SUPPORT_BELOW)
+        .map(([id]) => id),
+    };
   });
 
-  // 7. Response
+  const subjects = areaGroups
+    .slice()
+    .sort((a, b) => b.average - a.average)
+    .map((a) => ({
+      name: a.name,
+      score: round(a.average),
+      tone: toneFor(a.average),
+    }));
+
+  const strongest = subjects[0] ?? null;
+
+  // 8. Term progression: class average on each of the last N assessments this term
+  const progression = [
+    ...groupBy(termResults, (r) => r.assessments.id).values(),
+  ]
+    .map((rows) => ({
+      createdAt: rows[0].assessments.created_at,
+      name: rows[0].assessments.name,
+      value: mean(rows.map(percent))!,
+    }))
+    .sort((a, b) => a.createdAt.localeCompare(b.createdAt))
+    .slice(-PROGRESSION_POINTS)
+    .map((p) => ({
+      label: new Date(p.createdAt).toLocaleDateString("en-GB", {
+        day: "numeric",
+        month: "short",
+        timeZone: "Africa/Nairobi",
+      }),
+      name: p.name,
+      value: round(p.value),
+    }));
+
+  // Growth this term = last point minus first point
+  let growth: { value: number; label: string } | null = null;
+  if (progression.length >= 2) {
+    const diff =
+      progression[progression.length - 1].value - progression[0].value;
+    growth = {
+      value: diff,
+      label:
+        diff >= TREND_DELTA
+          ? "Steady upward movement"
+          : diff <= -TREND_DELTA
+            ? "Downward movement this term"
+            : "Holding steady",
+    };
+  }
+
+  // 9. Class signal (plain-language summary under the chart)
+  let classSignal = "Not enough results yet to show a class signal.";
+  if (progression.length >= 2 && subjects.length > 0) {
+    const diff = growth!.value;
+    const trendText =
+      diff >= TREND_DELTA
+        ? "The class is progressing consistently."
+        : diff <= -TREND_DELTA
+          ? "Class results have dipped this term."
+          : "Class results are holding steady.";
+
+    const needSupport = subjects
+      .filter((s) => s.tone !== "good")
+      .slice(-2) // weakest two (list is sorted best -> worst)
+      .reverse()
+      .map((s) => s.name);
+
+    const supportText = needSupport.length
+      ? `${joinNames(needSupport)} ${needSupport.length === 1 ? "is" : "are"} the clearest ${needSupport.length === 1 ? "opportunity" : "opportunities"} for targeted support.`
+      : "No learning area currently needs targeted support.";
+
+    classSignal = `${trendText} ${supportText}`;
+  }
+
+  // 10. AI-assisted insight: the subjects with the most learners below the line
+  const focusAreas = areaGroups
+    .filter((a) => a.belowThreshold > 0)
+    .sort((a, b) => b.belowThreshold - a.belowThreshold)
+    .slice(0, 2);
+
+  let insight: { headline: string; body: string; focusAreas: string[] } | null =
+    null;
+
+  if (focusAreas.length > 0) {
+    const names = focusAreas.map((a) => a.name);
+    const affected = new Set(focusAreas.flatMap((a) => a.belowStudentIds)).size;
+    insight = {
+      headline: `Prioritise ${joinNames(names)}.`,
+      body: `${affected} ${affected === 1 ? "learner is" : "learners are"} below ${NEEDS_SUPPORT_BELOW}% in ${joinNames(names)}. Consider a two-week small-group cycle, then compare evidence in the next assessment.`,
+      focusAreas: names,
+    };
+  }
+
+  // 11. Response
   return NextResponse.json(
     {
       date: today,
@@ -269,13 +338,26 @@ export async function GET(request: Request) {
         academicYear: current.academic_years.name,
         termNumber: activeTerm?.term_number ?? null,
       },
-      summary: {
-        needingSupport: rows.length,
-        highPriority: rows.filter((r) => r.level === "High priority").length,
-        improving: rows.filter((r) => r.improving).length,
-        learningAreas: new Set(rows.map((r) => r.subject)).size,
+      metrics: {
+        classAverage: currentAvg === null ? null : round(currentAvg),
+        changeFromLastTerm:
+          currentAvg !== null && previousAvg !== null
+            ? round(currentAvg - previousAvg)
+            : null,
+        learnersAssessed: {
+          assessed,
+          total,
+          coverage: total ? round((assessed / total) * 100) : 0,
+        },
+        strongestArea: strongest
+          ? { name: strongest.name, average: strongest.score }
+          : null,
+        growth,
       },
-      learners: rows,
+      subjects,
+      progression,
+      classSignal,
+      insight,
     },
     { headers: { "Cache-Control": "private, no-store" } },
   );
