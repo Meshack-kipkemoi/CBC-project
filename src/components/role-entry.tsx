@@ -18,12 +18,28 @@ const roles = [
     label: "Continue as parent",
   },
   {
+    key: "classroom-teacher",
+    title: "Classroom Teacher",
+    description:
+      "Follow your learner’s growth, celebrate progress, and support learning at home.",
+    icon: HeartHandshake,
+    label: "Continue as classroom teacher",
+  },
+  {
     key: "teacher",
     title: "Teacher",
     description:
-      "Turn everyday assessment evidence into timely, focused learner support.",
-    icon: GraduationCap,
-    label: "Continue as teacher",
+      "Follow your learner’s growth, celebrate progress, and support learning at home.",
+    icon: HeartHandshake,
+    label: "Continue as  teacher",
+  },
+  {
+    key: "principal",
+    title: "Principal",
+    description:
+      "Follow your learner’s growth, celebrate progress, and support learning at home.",
+    icon: HeartHandshake,
+    label: "Continue as principal",
   },
 ];
 
@@ -90,11 +106,7 @@ export function RoleEntry() {
                 return (
                   <Link
                     key={role.key}
-<<<<<<< HEAD
                     href={`/auth/login`}
-=======
-                    href={`/auth/login?role=${role.key}`}
->>>>>>> 12f8dfc7ca974294480d61ae75ef88430621ec20
                     className="group flex items-center gap-5 rounded-2xl border border-border bg-card p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4 sm:p-6"
                   >
                     <div className="flex size-14 shrink-0 items-center justify-center rounded-xl bg-secondary text-primary transition-colors group-hover:bg-accent">
