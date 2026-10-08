@@ -9,7 +9,7 @@ import {
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle,
+  CardTitle
 } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
@@ -17,10 +17,9 @@ import {
   InputGroup,
   InputGroupAddon,
   InputGroupButton,
-  InputGroupInput,
+  InputGroupInput
 } from "@/components/ui/input-group";
 import { Eye, EyeOff, Lock, Mail } from "lucide-react";
-import { OAuthButtons } from "@/components/auth/oauth-buttons";
 
 export function SignUpForm({
   className,
@@ -73,17 +72,16 @@ export function SignUpForm({
   };
 
   return (
-    <div className={cn("flex flex-col gap-6 py-24", className)} {...props}>
+    <div className={cn("flex flex-col max-w-sm gap-6", className)} {...props}>
       <Card>
         <CardHeader>
-          <CardTitle className="text-2xl">Create Account</CardTitle>
+          <CardTitle className="text-2xl font-bold">Create Account</CardTitle>
           <CardDescription>
             Create a new account and get your link
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex flex-col gap-4">
-            <OAuthButtons />
             <form onSubmit={handleSignUp}>
               <div className="flex flex-col gap-6">
                 <div className="grid gap-2">
