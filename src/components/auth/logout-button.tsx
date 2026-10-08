@@ -34,7 +34,7 @@ export const LogoutButton = React.forwardRef<
   return (
     <button
       ref={ref}
-      className={cn("cursor-pointer", className)}
+      className={cn(className, "cursor-pointer")}
       onClick={logout}
       {...props}
     >
