@@ -2,6 +2,8 @@ import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { ModeToggle } from "./mode-toggle";
 import { UserMenu } from "./user-menu";
+import { Button } from "@/components/ui/button";
+import { Bell } from "lucide-react";
 
 export async function AppHeader() {
   return (
@@ -14,9 +16,14 @@ export async function AppHeader() {
         />
         <h1 className="text-base font-bold">Dashboard</h1>
       </div>
-      <div className="flex gap-2">
+      <div className="flex gap-3 items-center">
         <ModeToggle />
-        <UserMenu />
+        <div className="flex gap-1 items-center">
+          <Button size="icon" variant="outline" aria-label="Notifications">
+            <Bell />
+          </Button>
+          <UserMenu />
+        </div>
       </div>
     </header>
   );

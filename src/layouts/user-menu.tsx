@@ -11,22 +11,12 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { LogoutButton } from "@/components/auth/logout-button";
-import { AlertCircle, ArrowUpDown, User, Wallet } from "lucide-react";
+import { AlertCircle, User } from "lucide-react";
 import { useUserQuery } from "@/hooks/use-user";
 import { Skeleton } from "@/components/ui/skeleton";
 import Link from "next/link";
 
 export const dropdownLinks = [
-  {
-    label: "Withdraw",
-    icon: Wallet,
-    url: "/dashboard/withdraw",
-  },
-  {
-    label: "My Transactions",
-    icon: ArrowUpDown,
-    url: "/dashboard/transactions",
-  },
   {
     label: "Account",
     icon: User,
@@ -128,8 +118,8 @@ export function UserMenu() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="h-8 w-8 rounded-full p-0">
-          <Avatar className="h-8 w-8">
+        <Button variant="ghost" size={"icon"}>
+          <Avatar className="size-full">
             <AvatarImage src={avatarUrl} alt={displayName} />
             <AvatarFallback className="bg-sidebar-primary text-sidebar-primary-foreground text-sm font-medium">
               {initials}

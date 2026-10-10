@@ -32,6 +32,7 @@ export default function RootLayout({
         roboto.variable,
         publicSansHeading.variable,
       )}
+      suppressHydrationWarning
     >
       <body className={`antialiased`}>
         <ThemeProvider

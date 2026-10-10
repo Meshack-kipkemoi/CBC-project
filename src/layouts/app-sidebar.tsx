@@ -11,7 +11,15 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { LayoutDashboardIcon, User } from "lucide-react";
+import {
+  CalendarCheck,
+  FileText,
+  GraduationCap,
+  LayoutDashboardIcon,
+  Network,
+  User,
+  Users,
+} from "lucide-react";
 import Link from "next/link";
 import { Logo } from "@/components/logo";
 import { NavUser } from "./nav-user";
@@ -22,6 +30,31 @@ const data = {
       title: "Dashboard",
       url: "/dashboard",
       icon: <LayoutDashboardIcon />,
+    },
+    {
+      title: "Grades",
+      url: "/dashboard/grades",
+      icon: <GraduationCap />,
+    },
+    {
+      title: "Streams",
+      url: "/dashboard/streams",
+      icon: <Network />,
+    },
+    {
+      title: "Students",
+      url: "/dashboard/students",
+      icon: <Users />,
+    },
+    {
+      title: "Attendance",
+      url: "/dashboard/attendance",
+      icon: <CalendarCheck />,
+    },
+    {
+      title: "Reports",
+      url: "/dashboard/reports",
+      icon: <FileText />,
     },
   ],
 
