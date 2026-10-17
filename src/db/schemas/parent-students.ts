@@ -1,7 +1,17 @@
-import { pgTable, uuid, timestamp, unique, index } from "drizzle-orm/pg-core";
+import {
+  pgTable,
+  uuid,
+  timestamp,
+  unique,
+  index,
+  pgPolicy,
+} from "drizzle-orm/pg-core";
 import { profiles } from "./profiles";
 import { students } from "./students";
 import { verificationStatus } from "./shared";
+import { authenticatedRole } from "drizzle-orm/supabase";
+import { uid } from "./rls";
+import { sql } from "drizzle-orm";
 
 // Parent-child relationships
 export const parentStudents = pgTable(
@@ -31,5 +41,10 @@ export const parentStudents = pgTable(
     unique().on(table.parentId, table.studentId),
     index("parent_students_parent_idx").on(table.parentId),
     index("parent_students_student_idx").on(table.studentId),
+    pgPolicy("parent_students_select_own", {
+      for: "select",
+      to: authenticatedRole,
+      using: sql`parent_students.parent_id = ${uid}`,
+    }),
   ],
 );

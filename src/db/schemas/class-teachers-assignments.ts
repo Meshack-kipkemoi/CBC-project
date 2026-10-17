@@ -1,7 +1,10 @@
-import { pgTable, uuid, unique, index } from "drizzle-orm/pg-core";
+import { pgTable, uuid, unique, index, pgPolicy } from "drizzle-orm/pg-core";
 import { profiles } from "./profiles";
 import { streams } from "./streams";
 import { academicYears } from "./academic-years";
+import { authenticatedRole } from "drizzle-orm/supabase";
+import { sql } from "drizzle-orm";
+import { isPrincipalOfStream, uid } from "./rls";
 
 // Teacher assignments
 export const classTeacherAssignments = pgTable(
@@ -21,5 +24,15 @@ export const classTeacherAssignments = pgTable(
   (table) => [
     unique().on(table.streamId, table.academicYearId),
     index("class_teacher_user_idx").on(table.teacherId),
+    pgPolicy("class_teacher_assignments_select_own", {
+      for: "select",
+      to: authenticatedRole,
+      using: sql`class_teacher_assignments.teacher_id = ${uid}`,
+    }),
+    pgPolicy("class_teacher_assignments_select_principal", {
+      for: "select",
+      to: authenticatedRole,
+      using: isPrincipalOfStream("class_teacher_assignments.stream_id"),
+    }),
   ],
 );

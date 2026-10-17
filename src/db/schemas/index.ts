@@ -6,6 +6,7 @@ export * from "./grading-scales";
 export * from "./learning-areas";
 export * from "./parent-students";
 export * from "./profiles";
+export * from "./rls";
 export * from "./roles";
 export * from "./schools";
 export * from "./shared";

@@ -44,7 +44,7 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "academic_years_school_id_schools_id_fkey"
+            foreignKeyName: "academic_years_school_id_schools_id_fk"
             columns: ["school_id"]
             isOneToOne: false
             referencedRelation: "schools"
@@ -94,35 +94,35 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "assessments_academic_year_id_academic_years_id_fkey"
+            foreignKeyName: "assessments_academic_year_id_academic_years_id_fk"
             columns: ["academic_year_id"]
             isOneToOne: false
             referencedRelation: "academic_years"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "assessments_created_by_profiles_id_fkey"
+            foreignKeyName: "assessments_created_by_profiles_id_fk"
             columns: ["created_by"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "assessments_learning_area_id_learning_areas_id_fkey"
+            foreignKeyName: "assessments_learning_area_id_learning_areas_id_fk"
             columns: ["learning_area_id"]
             isOneToOne: false
             referencedRelation: "learning_areas"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "assessments_school_id_schools_id_fkey"
+            foreignKeyName: "assessments_school_id_schools_id_fk"
             columns: ["school_id"]
             isOneToOne: false
             referencedRelation: "schools"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "assessments_term_id_terms_id_fkey"
+            foreignKeyName: "assessments_term_id_terms_id_fk"
             columns: ["term_id"]
             isOneToOne: false
             referencedRelation: "terms"
@@ -151,21 +151,21 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "class_teacher_assignments_4uXUQkeZcUtP_fkey"
+            foreignKeyName: "class_teacher_assignments_academic_year_id_academic_years_id_fk"
             columns: ["academic_year_id"]
             isOneToOne: false
             referencedRelation: "academic_years"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "class_teacher_assignments_stream_id_streams_id_fkey"
+            foreignKeyName: "class_teacher_assignments_stream_id_streams_id_fk"
             columns: ["stream_id"]
             isOneToOne: false
             referencedRelation: "streams"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "class_teacher_assignments_teacher_id_profiles_id_fkey"
+            foreignKeyName: "class_teacher_assignments_teacher_id_profiles_id_fk"
             columns: ["teacher_id"]
             isOneToOne: false
             referencedRelation: "profiles"
@@ -194,7 +194,7 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "grades_school_id_schools_id_fkey"
+            foreignKeyName: "grades_school_id_schools_id_fk"
             columns: ["school_id"]
             isOneToOne: false
             referencedRelation: "schools"
@@ -232,7 +232,7 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "grading_scales_school_id_schools_id_fkey"
+            foreignKeyName: "grading_scales_school_id_schools_id_fk"
             columns: ["school_id"]
             isOneToOne: false
             referencedRelation: "schools"
@@ -264,7 +264,7 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "learning_areas_school_id_schools_id_fkey"
+            foreignKeyName: "learning_areas_school_id_schools_id_fk"
             columns: ["school_id"]
             isOneToOne: false
             referencedRelation: "schools"
@@ -302,21 +302,21 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "parent_students_parent_id_profiles_id_fkey"
+            foreignKeyName: "parent_students_parent_id_profiles_id_fk"
             columns: ["parent_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "parent_students_student_id_students_id_fkey"
+            foreignKeyName: "parent_students_student_id_students_id_fk"
             columns: ["student_id"]
             isOneToOne: false
             referencedRelation: "students"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "parent_students_verified_by_profiles_id_fkey"
+            foreignKeyName: "parent_students_verified_by_profiles_id_fk"
             columns: ["verified_by"]
             isOneToOne: false
             referencedRelation: "profiles"
@@ -402,7 +402,7 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "streams_grade_id_grades_id_fkey"
+            foreignKeyName: "streams_grade_id_grades_id_fk"
             columns: ["grade_id"]
             isOneToOne: false
             referencedRelation: "grades"
@@ -440,21 +440,21 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "student_enrollments_academic_year_id_academic_years_id_fkey"
+            foreignKeyName: "student_enrollments_academic_year_id_academic_years_id_fk"
             columns: ["academic_year_id"]
             isOneToOne: false
             referencedRelation: "academic_years"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "student_enrollments_stream_id_streams_id_fkey"
+            foreignKeyName: "student_enrollments_stream_id_streams_id_fk"
             columns: ["stream_id"]
             isOneToOne: false
             referencedRelation: "streams"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "student_enrollments_student_id_students_id_fkey"
+            foreignKeyName: "student_enrollments_student_id_students_id_fk"
             columns: ["student_id"]
             isOneToOne: false
             referencedRelation: "students"
@@ -495,21 +495,21 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "student_results_assessment_id_assessments_id_fkey"
+            foreignKeyName: "student_results_assessment_id_assessments_id_fk"
             columns: ["assessment_id"]
             isOneToOne: false
             referencedRelation: "assessments"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "student_results_entered_by_profiles_id_fkey"
+            foreignKeyName: "student_results_entered_by_profiles_id_fk"
             columns: ["entered_by"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "student_results_student_id_students_id_fkey"
+            foreignKeyName: "student_results_student_id_students_id_fk"
             columns: ["student_id"]
             isOneToOne: false
             referencedRelation: "students"
@@ -544,7 +544,7 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "students_school_id_schools_id_fkey"
+            foreignKeyName: "students_school_id_schools_id_fk"
             columns: ["school_id"]
             isOneToOne: false
             referencedRelation: "schools"
@@ -576,28 +576,28 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "subject_teacher_assignments_BYLCh24iwKQZ_fkey"
-            columns: ["learning_area_id"]
-            isOneToOne: false
-            referencedRelation: "learning_areas"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "subject_teacher_assignments_QYCoJ5i3eg75_fkey"
+            foreignKeyName: "subject_teacher_assignments_academic_year_id_academic_years_id_"
             columns: ["academic_year_id"]
             isOneToOne: false
             referencedRelation: "academic_years"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "subject_teacher_assignments_stream_id_streams_id_fkey"
+            foreignKeyName: "subject_teacher_assignments_learning_area_id_learning_areas_id_"
+            columns: ["learning_area_id"]
+            isOneToOne: false
+            referencedRelation: "learning_areas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subject_teacher_assignments_stream_id_streams_id_fk"
             columns: ["stream_id"]
             isOneToOne: false
             referencedRelation: "streams"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "subject_teacher_assignments_teacher_id_profiles_id_fkey"
+            foreignKeyName: "subject_teacher_assignments_teacher_id_profiles_id_fk"
             columns: ["teacher_id"]
             isOneToOne: false
             referencedRelation: "profiles"
@@ -629,7 +629,7 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "terms_academic_year_id_academic_years_id_fkey"
+            foreignKeyName: "terms_academic_year_id_academic_years_id_fk"
             columns: ["academic_year_id"]
             isOneToOne: false
             referencedRelation: "academic_years"
@@ -661,21 +661,21 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "user_roles_role_id_roles_id_fkey"
+            foreignKeyName: "user_roles_role_id_roles_id_fk"
             columns: ["role_id"]
             isOneToOne: false
             referencedRelation: "roles"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "user_roles_school_id_schools_id_fkey"
+            foreignKeyName: "user_roles_school_id_schools_id_fk"
             columns: ["school_id"]
             isOneToOne: false
             referencedRelation: "schools"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "user_roles_user_id_profiles_id_fkey"
+            foreignKeyName: "user_roles_user_id_profiles_id_fk"
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"

@@ -33,7 +33,7 @@ export default async function DashboardLayout({
         <AppSidebar variant="floating" />
         <SidebarInset>
           <AppHeader />
-          <div className="flex-1 space-y-8 bg-muted/30 p-4">
+          <div className="flex-1 space-y-6 bg-muted/40 dark:bg-muted/80 p-4">
             <AppBreadcrumb />
             {children}
           </div>

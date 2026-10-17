@@ -2,12 +2,200 @@ import { db } from "@/index";
 import * as schema from "@/db/schemas";
 import fs from "fs";
 import path from "path";
+import { faker } from "@faker-js/faker";
 import { users, USERS_SEED_FILE } from "./01-users";
 
 const IDS_PATH = path.resolve("src/db/seeds/.auth-user-ids.json");
 
+// ---------------------------------------------------------------------------
+// Student generation helpers
+// ---------------------------------------------------------------------------
+
+const STUDENT_COUNT = 240; // total students, including the two fixed ones below
+const INSERT_CHUNK_SIZE = 100;
+
+// Faker has no Kenyan locale, so we pick from Kenyan name pools with faker's
+// seeded randomness (keeps the output reproducible between runs).
+const KENYAN_FIRST_NAMES = [
+  "Ian",
+  "Joy",
+  "Brian",
+  "Faith",
+  "Kevin",
+  "Mercy",
+  "Dennis",
+  "Grace",
+  "Collins",
+  "Esther",
+  "Brenda",
+  "Victor",
+  "Lucy",
+  "Samuel",
+  "Purity",
+  "Eric",
+  "Cynthia",
+  "Felix",
+  "Winnie",
+  "Peter",
+  "Naomi",
+  "Allan",
+  "Mary",
+  "Kelvin",
+  "Sharon",
+  "Martin",
+  "Beatrice",
+  "Emmanuel",
+  "Hellen",
+  "Duncan",
+  "Caroline",
+  "Austin",
+  "Rose",
+  "Vincent",
+  "Irene",
+  "Nelson",
+  "Lilian",
+  "Elvis",
+  "Stacy",
+  "Tony",
+  "Diana",
+  "Abdi",
+  "Amina",
+  "Hassan",
+  "Fatuma",
+  "Wafula",
+  "Nafula",
+  "Otieno",
+  "Atieno",
+  "Kiprop",
+  "Chebet",
+  "Kipchoge",
+  "Wanjiru",
+  "Mutua",
+  "Mwikali",
+  "Njoroge",
+  "Wambui",
+  "Kariuki",
+];
+
+const KENYAN_LAST_NAMES = [
+  "Kamau",
+  "Akinyi",
+  "Otieno",
+  "Wanjiku",
+  "Mwangi",
+  "Njeri",
+  "Ochieng",
+  "Wafula",
+  "Kiplagat",
+  "Chebet",
+  "Mutua",
+  "Kilonzo",
+  "Omondi",
+  "Adhiambo",
+  "Kimani",
+  "Waweru",
+  "Maina",
+  "Nyambura",
+  "Karanja",
+  "Muriuki",
+  "Onyango",
+  "Achieng",
+  "Barasa",
+  "Nekesa",
+  "Kipkorir",
+  "Jepkosgei",
+  "Mbugua",
+  "Gathoni",
+  "Odhiambo",
+  "Awino",
+  "Juma",
+  "Hussein",
+  "Abdullahi",
+  "Ndungu",
+  "Wekesa",
+  "Simiyu",
+  "Rotich",
+  "Koech",
+  "Macharia",
+  "Githinji",
+  "Mwende",
+  "Musyoka",
+  "Nzioka",
+  "Wairimu",
+  "Ouma",
+  "Anyango",
+  "Mohamed",
+  "Ali",
+];
+
+// Fixed students that other parts of the seeder rely on (parent link, results).
+const FIXED_STUDENTS = [
+  { admissionNumber: "13521", fullName: "Ian Kamau" },
+  { admissionNumber: "14834", fullName: "Joy Akinyi" },
+];
+
+function generateStudents(schoolId: string, count: number) {
+  // Admission numbers are 5 digits in the 10000-19999 range (e.g. 13521).
+  // A Set guarantees uniqueness across the whole batch.
+  const usedAdmissionNumbers = new Set<string>(
+    FIXED_STUDENTS.map((s) => s.admissionNumber),
+  );
+  const usedNames = new Set<string>(FIXED_STUDENTS.map((s) => s.fullName));
+
+  const students: {
+    schoolId: string;
+    admissionNumber: string;
+    fullName: string;
+    status: "active";
+  }[] = FIXED_STUDENTS.map((s) => ({
+    schoolId,
+    admissionNumber: s.admissionNumber,
+    fullName: s.fullName,
+    status: "active" as const,
+  }));
+
+  while (students.length < count) {
+    const admissionNumber = String(
+      faker.number.int({ min: 10000, max: 19999 }),
+    );
+    if (usedAdmissionNumbers.has(admissionNumber)) continue;
+
+    const fullName = `${faker.helpers.arrayElement(
+      KENYAN_FIRST_NAMES,
+    )} ${faker.helpers.arrayElement(KENYAN_LAST_NAMES)}`;
+    // Avoid exact duplicate names so the data is easier to eyeball.
+    if (usedNames.has(fullName)) continue;
+
+    usedAdmissionNumbers.add(admissionNumber);
+    usedNames.add(fullName);
+
+    students.push({
+      schoolId,
+      admissionNumber,
+      fullName,
+      status: "active",
+    });
+  }
+
+  // Sort by admission number so inserted order looks natural.
+  return students.sort((a, b) =>
+    a.admissionNumber.localeCompare(b.admissionNumber),
+  );
+}
+
+function chunk<T>(items: T[], size: number): T[][] {
+  const chunks: T[][] = [];
+  for (let i = 0; i < items.length; i += size) {
+    chunks.push(items.slice(i, i + size));
+  }
+  return chunks;
+}
+
 export default async function seed() {
   console.log("🌱 Starting database seed...");
+
+  // Make the generated data reproducible between runs.
+  faker.seed(2026);
 
   // 1. Roles
   console.log("Seeding Roles...");
@@ -231,41 +419,43 @@ export default async function seed() {
   });
 
   // 11. Students
-  console.log("Seeding Students...");
-  const [student1, student2] = await db
-    .insert(schema.students)
-    .values([
-      {
-        schoolId: school.id,
-        admissionNumber: "ADM-2026-001",
-        fullName: "Ian Kamau",
-        status: "active",
-      },
-      {
-        schoolId: school.id,
-        admissionNumber: "ADM-2026-002",
-        fullName: "Joy Akinyi",
-        status: "active",
-      },
-    ])
-    .returning();
+  console.log(`Seeding ${STUDENT_COUNT} Students...`);
+  const studentValues = generateStudents(school.id, STUDENT_COUNT);
+
+  const students: (typeof schema.students.$inferSelect)[] = [];
+  for (const batch of chunk(studentValues, INSERT_CHUNK_SIZE)) {
+    const inserted = await db.insert(schema.students).values(batch).returning();
+    students.push(...inserted);
+  }
+
+  // The first two fixed students are used below for the parent link and results.
+  const student1 = students.find((s) => s.admissionNumber === "13521");
+  const student2 = students.find((s) => s.admissionNumber === "14834");
+
+  if (!student1 || !student2) {
+    throw new Error("Failed to retrieve the fixed seed students.");
+  }
 
   // 12. Student Enrollments
   console.log("Seeding Enrollments...");
-  await db.insert(schema.studentEnrollments).values([
-    {
-      studentId: student1.id,
-      streamId: stream7East.id,
+  const enrollmentValues = students.map((student) => {
+    // Keep the two fixed students in East; split everyone else evenly.
+    const isFixed = student.id === student1.id || student.id === student2.id;
+    const stream = isFixed
+      ? stream7East
+      : faker.helpers.arrayElement([stream7East, stream7West]);
+
+    return {
+      studentId: student.id,
+      streamId: stream.id,
       academicYearId: academicYear.id,
       startDate: "2026-01-05",
-    },
-    {
-      studentId: student2.id,
-      streamId: stream7East.id,
-      academicYearId: academicYear.id,
-      startDate: "2026-01-05",
-    },
-  ]);
+    };
+  });
+
+  for (const batch of chunk(enrollmentValues, INSERT_CHUNK_SIZE)) {
+    await db.insert(schema.studentEnrollments).values(batch);
+  }
 
   // 13. Parent-Student Link
   console.log("Seeding Parent-Student records...");
