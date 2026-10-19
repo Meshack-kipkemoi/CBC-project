@@ -54,7 +54,7 @@ export const columns = columnHelper.columns([
     cell: ({ row }) => (
       <div className="flex justify-end">
         <Button asChild variant={"outline"} size="sm" className="group/button">
-          <Link href={`/dashboard/student/${row.original.id}`}>
+          <Link href={`/dashboard/students/${row.original.id}`}>
             Details
             <ChevronRight className="group-hover/button:translate-x-0.5 transition-all" />
           </Link>

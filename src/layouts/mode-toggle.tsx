@@ -11,6 +11,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { ThemeToggleCircular } from "@/components/ui/theme-toggle-circular";
 
 const themes = [
   { value: "light", label: "Light", icon: Sun },
@@ -29,7 +30,12 @@ export function ModeToggle() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" title="Change theme">
+        <Button
+          variant="ghost"
+          size="icon"
+          title="Change theme"
+          id="theme-anchor"
+        >
           {mounted ? <CurrentIcon /> : <Laptop />}
           <span className="sr-only">Toggle theme</span>
         </Button>
@@ -37,10 +43,16 @@ export function ModeToggle() {
 
       <DropdownMenuContent align="end">
         {themes.map(({ value, label, icon: Icon }) => (
-          <DropdownMenuItem key={value} onClick={() => setTheme(value)}>
-            <Icon className="mr-2" />
-            {label}
-          </DropdownMenuItem>
+          <ThemeToggleCircular
+            key={value}
+            onToggle={() => setTheme(value)}
+            theme={theme}
+          >
+            <DropdownMenuItem>
+              <Icon className="mr-2" />
+              {label}
+            </DropdownMenuItem>
+          </ThemeToggleCircular>
         ))}
       </DropdownMenuContent>
     </DropdownMenu>

@@ -28,7 +28,10 @@ export function NavMain({
       <SidebarGroupContent>
         <SidebarMenu className="gap-2">
           {items.map((item) => {
-            const isActive = pathname === item.url;
+            const isActive =
+              item.url !== "/dashboard"
+                ? pathname.startsWith(item.url)
+                : pathname === item.url;
 
             return (
               <SidebarMenuItem key={item.title}>

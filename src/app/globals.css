@@ -82,6 +82,12 @@
   --sidebar-ring: oklch(0.723 0.014 214.4);
   --background: oklch(1 0 0);
   --foreground: oklch(0.148 0.004 228.8);
+
+  /* ---------------- Animation variable ---------------- */
+  --transition-speed: 0.5s;
+  --transition-blur: 0px;
+  --x: 50%;
+  --y: 50%;
 }
 
 .dark {
@@ -118,6 +124,68 @@
   --sidebar-ring: oklch(0.56 0.021 213.5);
 }
 
+::view-transition-group(root) {
+  animation: none;
+  isolation: isolate;
+  overflow: hidden;
+}
+
+::view-transition-image-pair(root) {
+  isolation: isolate;
+  overflow: hidden;
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  filter: blur(var(--transition-blur));
+  overflow: hidden;
+  backface-visibility: hidden;
+  contain: paint;
+}
+
+[data-theme-transition="to-dark"]::view-transition-old(root),
+[data-theme-transition="to-light"]::view-transition-new(root) {
+  animation: none;
+  z-index: -1;
+  mix-blend-mode: normal;
+}
+
+[data-theme-transition="to-dark"]::view-transition-new(root),
+[data-theme-transition="to-light"]::view-transition-new(root) {
+  animation: circle var(--transition-speed) ease-in-out;
+  will-change: clip-path;
+  mix-blend-mode: normal;
+  z-index: 1;
+  transform: translateZ(0);
+}
+
+@keyframes circle {
+  from {
+    clip-path: circle(0% at var(--x) var(--y));
+  }
+
+  to {
+    clip-path: circle(150% at var(--x) var(--y));
+  }
+}
+
+@keyframes circle-reverse {
+  from {
+    clip-path: circle(150% at var(--x) var(--y));
+  }
+  to {
+    clip-path: circle(0% at var(--x) var(--y));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-new(*),
+  ::view-transition-old(*) {
+    animation: none !important;
+  }
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
@@ -129,12 +197,12 @@
     @apply font-sans;
   }
 
-@keyframes shimmer {
-  from {
-    transform: translateX(-100%);
+  @keyframes shimmer {
+    from {
+      transform: translateX(-100%);
     }
-  to {
-    transform: translateX(200%);
+    to {
+      transform: translateX(200%);
     }
   }
 }
