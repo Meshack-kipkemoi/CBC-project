@@ -31,7 +31,7 @@ export function studentsQuery(
 // One student row exactly as Supabase returns it
 export type StudentRow = QueryData<ReturnType<typeof studentsQuery>>[number];
 
-export type StudentsPage = {
+export type StudentsResults = {
   rows: StudentRow[];
   nextCursor: number | null;
 };

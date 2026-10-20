@@ -1,10 +1,11 @@
-import { NextResponse, type NextRequest } from "next/server";
+import { type NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import {
   PAGE_SIZE,
   studentsQuery,
-  type StudentsPage,
+  type StudentsResults,
 } from "@/lib/queries/students";
+import { createResponse } from "@/lib/api";
 
 export async function GET(req: NextRequest) {
   const { searchParams } = req.nextUrl;
@@ -18,13 +19,23 @@ export async function GET(req: NextRequest) {
   });
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.log(error);
+    return createResponse({
+      status: 500,
+      message: error.message,
+    });
   }
 
   const next = cursor + PAGE_SIZE;
-  const body: StudentsPage = {
+
+  const body: StudentsResults = {
     rows: data,
     nextCursor: next < (count ?? 0) ? next : null,
   };
-  return NextResponse.json(body);
+
+  return createResponse({
+    status: 200,
+    message: "Students successfully fetched",
+    data: body,
+  });
 }

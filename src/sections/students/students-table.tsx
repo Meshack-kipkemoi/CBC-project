@@ -37,8 +37,10 @@ export function StudentsTable() {
   }, [input]);
 
   const query = useStudentsQuery(search);
-  const page = query.data?.pages[pageIndex];
-  const hasNext = !!page?.nextCursor || !!query.data?.pages[pageIndex + 1];
+  const pages = query.data?.pages ?? [];
+  const page = pages[pageIndex]?.data;
+
+  const hasNext = !!page?.nextCursor || !!pages[pageIndex + 1];
 
   const data = useMemo<TableStudent[]>(
     () =>
@@ -59,8 +61,7 @@ export function StudentsTable() {
 
   const goNext = () => {
     setPageIndex((i) => i + 1);
-    // Already-fetched pages show instantly; otherwise skeletons show until it lands
-    if (!query.data?.pages[pageIndex + 1]) query.fetchNextPage();
+    if (!pages[pageIndex + 1]) query.fetchNextPage();
   };
 
   return (
@@ -91,7 +92,7 @@ export function StudentsTable() {
             ))}
           </TableHeader>
           <TableBody>
-            {!page ? (
+            {!page && !query.isError ? (
               Array.from({ length: 10 }).map((_, i) => (
                 <TableRow key={i}>
                   {columns.map((_, j) => (
@@ -117,9 +118,7 @@ export function StudentsTable() {
                   colSpan={columns.length}
                   className="h-24 text-center"
                 >
-                  {query.isError
-                    ? "Something went wrong."
-                    : "No students found."}
+                  {query.isError ? query.error.message : "No students found."}
                 </TableCell>
               </TableRow>
             )}

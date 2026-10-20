@@ -1,3 +1,4 @@
+import { BreadcrumbProvider } from "@/components/providers/breadcrumb-provider";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AppBreadcrumb } from "@/layouts/app-breadcrumb";
@@ -33,10 +34,12 @@ export default async function DashboardLayout({
         <AppSidebar variant="floating" />
         <SidebarInset>
           <AppHeader />
-          <div className="flex-1 space-y-6 bg-muted/40 dark:bg-muted/80 p-4">
-            <AppBreadcrumb />
-            {children}
-          </div>
+          <BreadcrumbProvider>
+            <div className="flex-1 space-y-6 bg-muted/40 dark:bg-muted/80 p-4">
+              <AppBreadcrumb />
+              {children}
+            </div>
+          </BreadcrumbProvider>
         </SidebarInset>
       </TooltipProvider>
     </SidebarProvider>

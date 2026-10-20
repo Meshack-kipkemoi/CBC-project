@@ -1,5 +1,5 @@
 "use client";
-import { useRouter } from "next/navigation";
+import { useRouter } from "nextjs-toploader/app";
 import { createClient } from "@/lib/supabase/client";
 import { LogOut } from "lucide-react";
 import React from "react";
