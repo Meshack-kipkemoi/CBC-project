@@ -1,0 +1,5 @@
+ALTER TABLE "assessments" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
+CREATE POLICY "assessments_select_principal" ON "assessments" AS PERMISSIVE FOR SELECT TO "authenticated" USING (is_principal_of((select auth.uid()), assessments.school_id));--> statement-breakpoint
+CREATE POLICY "assessments_select_class_teacher" ON "assessments" AS PERMISSIVE FOR SELECT TO "authenticated" USING (is_class_teacher_of_school((select auth.uid()), assessments.school_id));--> statement-breakpoint
+CREATE POLICY "assessments_select_subject_teacher" ON "assessments" AS PERMISSIVE FOR SELECT TO "authenticated" USING (is_subject_teacher_of_school((select auth.uid()), assessments.school_id));--> statement-breakpoint
+CREATE POLICY "assessments_select_parent" ON "assessments" AS PERMISSIVE FOR SELECT TO "authenticated" USING (is_verified_parent_of_school((select auth.uid()), assessments.school_id));

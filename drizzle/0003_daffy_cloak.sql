@@ -1,0 +1,2 @@
+ALTER TABLE "student_enrollments" DROP CONSTRAINT "student_enrollments_student_id_unique";--> statement-breakpoint
+CREATE UNIQUE INDEX "one_active_enrollment_per_student" ON "student_enrollments" USING btree ("student_id") WHERE "student_enrollments"."end_date" is null;

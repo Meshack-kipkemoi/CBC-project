@@ -2,14 +2,53 @@ import { sql } from "drizzle-orm";
 
 export const uid = sql`(select auth.uid())`;
 
-// True if the current user is principal of the school that owns this stream.
-// `streamCol` is a trusted column reference like "student_enrollments.stream_id".
-export const isPrincipalOfStream = (streamCol: string) => sql`exists (
-  select 1 from streams s
-  join grades g on g.id = s.grade_id
-  join user_roles ur on ur.school_id = g.school_id
-  join roles r on r.id = ur.role_id
-  where s.id = ${sql.raw(streamCol)}
-    and ur.user_id = ${uid}
-    and r.name = 'principal'
-)`;
+export const isPrincipalOf = (schoolCol: string) =>
+  sql`is_principal_of(${uid}, ${sql.raw(schoolCol)})`;
+
+export const isPrincipalOfStream = (streamCol: string) =>
+  sql`is_principal_of_stream(${uid}, ${sql.raw(streamCol)})`;
+
+export const isPrincipalOfStudent = (studentCol: string) =>
+  sql`is_principal_of(${uid}, student_school(${sql.raw(studentCol)}))`;
+
+export const isVerifiedParentOf = (studentCol: string) =>
+  sql`is_verified_parent_of(${uid}, ${sql.raw(studentCol)})`;
+
+export const isClassTeacherOfStudent = (studentCol: string) =>
+  sql`is_class_teacher_of_student(${uid}, ${sql.raw(studentCol)})`;
+
+export const isSubjectTeacherOfStudent = (studentCol: string) =>
+  sql`is_subject_teacher_of_student(${uid}, ${sql.raw(studentCol)})`;
+
+export const isClassTeacherOfStudentGrade = (studentCol: string) =>
+  sql`is_class_teacher_of_student_grade(${uid}, ${sql.raw(studentCol)})`;
+
+export const isClassTeacherOfStream = (streamCol: string, yearCol: string) =>
+  sql`is_class_teacher_of_stream(${uid}, ${sql.raw(streamCol)}, ${sql.raw(yearCol)})`;
+
+export const isSubjectTeacherOfStream = (streamCol: string, yearCol: string) =>
+  sql`is_subject_teacher_of_stream(${uid}, ${sql.raw(streamCol)}, ${sql.raw(yearCol)})`;
+
+export const isClassTeacherOfSchool = (schoolCol: string) =>
+  sql`is_class_teacher_of_school(${uid}, ${sql.raw(schoolCol)})`;
+
+export const isSubjectTeacherOfSchool = (schoolCol: string) =>
+  sql`is_subject_teacher_of_school(${uid}, ${sql.raw(schoolCol)})`;
+
+export const isVerifiedParentOfSchool = (schoolCol: string) =>
+  sql`is_verified_parent_of_school(${uid}, ${sql.raw(schoolCol)})`;
+
+export const isPrincipalOfTerm = (termCol: string) =>
+  sql`is_principal_of_term(${uid}, ${sql.raw(termCol)})`;
+
+export const isClassTeacherOfTerm = (termCol: string) =>
+  sql`is_class_teacher_of_term(${uid}, ${sql.raw(termCol)})`;
+
+export const isSubjectTeacherOfTerm = (termCol: string) =>
+  sql`is_subject_teacher_of_term(${uid}, ${sql.raw(termCol)})`;
+
+export const isVerifiedParentOfTerm = (termCol: string) =>
+  sql`is_verified_parent_of_term(${uid}, ${sql.raw(termCol)})`;
+
+export const isPrincipalOfProfile = (profileCol: string) =>
+  sql`is_principal_of_profile(${uid}, ${sql.raw(profileCol)})`;

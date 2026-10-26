@@ -6,6 +6,7 @@ import {
   timestamp,
   check,
   pgEnum,
+  pgPolicy,
 } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 import { schools } from "./schools";
@@ -14,6 +15,13 @@ import { terms } from "./terms";
 import { learningAreas } from "./learning-areas";
 import { assessmentStatus } from "./shared";
 import { profiles } from "./profiles";
+import { authenticatedRole } from "drizzle-orm/supabase";
+import {
+  isClassTeacherOfSchool,
+  isPrincipalOf,
+  isSubjectTeacherOfSchool,
+  isVerifiedParentOfSchool,
+} from "./rls";
 
 export const assessmentType = pgEnum("assessment_type", [
   "Classroom Assessment",
@@ -54,5 +62,35 @@ export const assessments = pgTable(
       .defaultNow()
       .notNull(),
   },
-  (table) => [check("assessment_max_score_check", sql`${table.maxScore} > 0`)],
+  (table) => [
+    check("assessment_max_score_check", sql`${table.maxScore} > 0`),
+
+    // Principal: all assessments in their school
+    pgPolicy("assessments_select_principal", {
+      for: "select",
+      to: authenticatedRole,
+      using: isPrincipalOf("assessments.school_id"),
+    }),
+
+    // Class teacher: assessments in schools they teach in
+    pgPolicy("assessments_select_class_teacher", {
+      for: "select",
+      to: authenticatedRole,
+      using: isClassTeacherOfSchool("assessments.school_id"),
+    }),
+
+    // Subject teacher: assessments in schools they teach in
+    pgPolicy("assessments_select_subject_teacher", {
+      for: "select",
+      to: authenticatedRole,
+      using: isSubjectTeacherOfSchool("assessments.school_id"),
+    }),
+
+    // Parent: assessments in schools where they have a verified child
+    pgPolicy("assessments_select_parent", {
+      for: "select",
+      to: authenticatedRole,
+      using: isVerifiedParentOfSchool("assessments.school_id"),
+    }),
+  ],
 );

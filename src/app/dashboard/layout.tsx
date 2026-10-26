@@ -1,6 +1,7 @@
 import { BreadcrumbProvider } from "@/components/providers/breadcrumb-provider";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { AiSidepanel } from "@/layouts/ai/ai-sidepanel";
 import { AppBreadcrumb } from "@/layouts/app-breadcrumb";
 import { AppHeader } from "@/layouts/app-header";
 import { AppSidebar } from "@/layouts/app-sidebar";
@@ -40,6 +41,7 @@ export default async function DashboardLayout({
               {children}
             </div>
           </BreadcrumbProvider>
+          <AiSidepanel />
         </SidebarInset>
       </TooltipProvider>
     </SidebarProvider>

@@ -521,6 +521,7 @@ export type Database = {
         Row: {
           admission_number: string
           created_at: string
+          date_of_birth: string | null
           full_name: string
           id: string
           school_id: string
@@ -529,6 +530,7 @@ export type Database = {
         Insert: {
           admission_number: string
           created_at?: string
+          date_of_birth?: string | null
           full_name: string
           id?: string
           school_id: string
@@ -537,6 +539,7 @@ export type Database = {
         Update: {
           admission_number?: string
           created_at?: string
+          date_of_birth?: string | null
           full_name?: string
           id?: string
           school_id?: string
@@ -688,7 +691,39 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      is_class_teacher_of_stream: {
+        Args: { p_stream_id: string; p_user_id: string; p_year_id: string }
+        Returns: boolean
+      }
+      is_class_teacher_of_student: {
+        Args: { p_student_id: string; p_user_id: string }
+        Returns: boolean
+      }
+      is_class_teacher_of_student_grade: {
+        Args: { p_student_id: string; p_user_id: string }
+        Returns: boolean
+      }
+      is_principal_of: {
+        Args: { p_school_id: string; p_user_id: string }
+        Returns: boolean
+      }
+      is_principal_of_stream: {
+        Args: { p_stream_id: string; p_user_id: string }
+        Returns: boolean
+      }
+      is_subject_teacher_of_stream: {
+        Args: { p_stream_id: string; p_user_id: string; p_year_id: string }
+        Returns: boolean
+      }
+      is_subject_teacher_of_student: {
+        Args: { p_student_id: string; p_user_id: string }
+        Returns: boolean
+      }
+      is_verified_parent_of: {
+        Args: { p_student_id: string; p_user_id: string }
+        Returns: boolean
+      }
+      student_school: { Args: { p_student_id: string }; Returns: string }
     }
     Enums: {
       app_role: "principal" | "class_teacher" | "teacher" | "parent"

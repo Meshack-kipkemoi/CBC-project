@@ -1,0 +1,1 @@
+ALTER TABLE "students" RENAME COLUMN "data_of_birth" TO "date_of_birth";

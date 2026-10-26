@@ -1,3 +1,5 @@
+// api/students/route.ts
+
 import { type NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import {

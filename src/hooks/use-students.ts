@@ -1,3 +1,5 @@
+// hooks/use-students.ts
+
 import { InfiniteData, useInfiniteQuery } from "@tanstack/react-query";
 import type { StudentsResults } from "@/lib/queries/students";
 import { ApiResponse } from "@/lib/api";

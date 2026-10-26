@@ -1,0 +1,1 @@
+CREATE POLICY "streams_select_principal" ON "streams" AS PERMISSIVE FOR SELECT TO "authenticated" USING (is_principal_of((select auth.uid()), (select g.school_id from grades g where g.id = streams.grade_id)));

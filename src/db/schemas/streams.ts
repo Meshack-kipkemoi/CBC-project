@@ -1,8 +1,10 @@
-import { pgTable, uuid, text, unique, pgPolicy } from "drizzle-orm/pg-core";
+import { pgTable, text, unique, pgPolicy, uuid } from "drizzle-orm/pg-core";
 import { grades } from "./grades";
 import { authenticatedRole } from "drizzle-orm/supabase";
-import { sql } from "drizzle-orm";
 import { uid } from "./rls";
+import { sql } from "drizzle-orm";
+
+const streamSchool = sql`(select g.school_id from grades g where g.id = streams.grade_id)`;
 
 export const streams = pgTable(
   "streams",
@@ -15,14 +17,26 @@ export const streams = pgTable(
   },
   (table) => [
     unique().on(table.gradeId, table.name),
-    pgPolicy("streams_select_school_members", {
+
+    pgPolicy("streams_select_principal", {
       for: "select",
       to: authenticatedRole,
-      using: sql`exists (
-    select 1 from grades g
-    join user_roles ur on ur.school_id = g.school_id
-    where g.id = streams.grade_id and ur.user_id = ${uid}
-  )`,
+      using: sql`is_principal_of(${uid}, ${streamSchool})`,
+    }),
+    pgPolicy("streams_select_class_teacher", {
+      for: "select",
+      to: authenticatedRole,
+      using: sql`is_class_teacher_of_school(${uid}, ${streamSchool})`,
+    }),
+    pgPolicy("streams_select_subject_teacher", {
+      for: "select",
+      to: authenticatedRole,
+      using: sql`is_subject_teacher_of_school(${uid}, ${streamSchool})`,
+    }),
+    pgPolicy("streams_select_parent", {
+      for: "select",
+      to: authenticatedRole,
+      using: sql`is_verified_parent_of_school(${uid}, ${streamSchool})`,
     }),
   ],
 );

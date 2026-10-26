@@ -10,7 +10,7 @@ import { profiles } from "./profiles";
 import { students } from "./students";
 import { verificationStatus } from "./shared";
 import { authenticatedRole } from "drizzle-orm/supabase";
-import { uid } from "./rls";
+import { isPrincipalOfStudent, uid } from "./rls";
 import { sql } from "drizzle-orm";
 
 // Parent-child relationships
@@ -45,6 +45,12 @@ export const parentStudents = pgTable(
       for: "select",
       to: authenticatedRole,
       using: sql`parent_students.parent_id = ${uid}`,
+    }),
+
+    pgPolicy("parent_students_select_principal", {
+      for: "select",
+      to: authenticatedRole,
+      using: isPrincipalOfStudent("parent_students.student_id"),
     }),
   ],
 );
