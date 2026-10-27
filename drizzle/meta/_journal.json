@@ -155,6 +155,62 @@
       "when": 1793087069051,
       "tag": "0021_moaning_cerebro",
       "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "7",
+      "when": 1793088221527,
+      "tag": "0022_grades_report",
+      "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1793105535460,
+      "tag": "0023_dashboard_overview",
+      "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1793106850789,
+      "tag": "0024_stream_overview",
+      "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1793109542137,
+      "tag": "0025_attendance_overview",
+      "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "7",
+      "when": 1793110031207,
+      "tag": "0026_attendance_overview_review1",
+      "breakpoints": true
+    },
+    {
+      "idx": 27,
+      "version": "7",
+      "when": 1793110932157,
+      "tag": "0027_remove_attendance_tables",
+      "breakpoints": true
+    },
+    {
+      "idx": 28,
+      "version": "7",
+      "when": 1793111438348,
+      "tag": "0028_powerful_ezekiel_stane",
+      "breakpoints": true
+    },
+    {
+      "idx": 29,
+      "version": "7",
+      "when": 1793111892685,
+      "tag": "0029_careless_newton_destine",
+      "breakpoints": true
     }
   ]
 }

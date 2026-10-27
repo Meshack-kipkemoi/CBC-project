@@ -1,6 +1,6 @@
 "use client";
 
-import * as React from "react";
+import type { ReactNode } from "react";
 import {
   Select,
   SelectContent,
@@ -9,104 +9,121 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useDashboard } from "./dashboard-context";
 
-const academicYears = ["2024", "2025", "2026"];
+function Field({ label, children }: { label: string; children: ReactNode }) {
+  return (
+    <div className="flex gap-1.5 items-center flex-1">
+      <label className="text-sm font-medium">{label}</label>
+      {children}
+    </div>
+  );
+}
 
-const terms = ["Term 1", "Term 2", "Term 3"];
-
-const grades = ["Grade 7", "Grade 8", "Grade 9"];
-
-const streamsByGrade: Record<string, string[]> = {
-  "Grade 7": ["Stream A", "Stream B", "Stream C"],
-  "Grade 8": ["Stream A", "Stream B", "Stream C"],
-  "Grade 9": ["Stream A", "Stream B", "Stream C"],
-};
+function FiltersSkeleton() {
+  return (
+    <div className="flex flex-nowrap gap-4">
+      {Array.from({ length: 4 }).map((_, i) => (
+        <Skeleton key={i} className="h-9 flex-1" />
+      ))}
+    </div>
+  );
+}
 
 export function Filters() {
-  const [academicYear, setAcademicYear] = React.useState("2026");
-  const [term, setTerm] = React.useState("Term 1");
-  const [grade, setGrade] = React.useState("all");
-  const [stream, setStream] = React.useState("all");
+  const { query, selection, setYear, setTerm, setGrade, setStream } =
+    useDashboard();
 
-  const streams = grade === "all" ? [] : (streamsByGrade[grade] ?? []);
+  if (!query.data) return <FiltersSkeleton />;
 
-  function handleGradeChange(value: string) {
-    setGrade(value);
-    setStream("all");
-  }
+  const f = query.data.filters;
+
+  // The user's pick wins immediately; otherwise show what the server resolved
+  const year = f.years.find((y) => y.id === (selection.year ?? f.yearId));
+  const term = year?.terms.find((t) => t.id === (selection.term ?? f.termId));
+  const grade = f.grades.find((g) => g.id === (selection.grade ?? f.gradeId));
+  const stream = grade?.streams.find(
+    (s) => s.id === (selection.stream ?? f.streamId),
+  );
 
   return (
     <ScrollArea>
       <div className="flex flex-nowrap gap-4">
-        <div className="flex gap-1.5 items-center flex-1">
-          <label className="text-sm font-medium">Year</label>
-          <Select value={academicYear} onValueChange={setAcademicYear}>
+        <Field label="Year">
+          <Select value={year?.id ?? ""} onValueChange={(v) => v && setYear(v)}>
             <SelectTrigger className="w-full">
-              <SelectValue placeholder="Select year" />
+              <SelectValue>{year?.name ?? "Select year"}</SelectValue>
             </SelectTrigger>
             <SelectContent>
-              {academicYears.map((year) => (
-                <SelectItem key={year} value={year}>
-                  {year}
+              {f.years.map((y) => (
+                <SelectItem key={y.id} value={y.id}>
+                  {y.name}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
-        </div>
+        </Field>
 
-        <div className="flex gap-1.5 items-center flex-1">
-          <label className="text-sm font-medium">Term</label>
-          <Select value={term} onValueChange={setTerm}>
+        <Field label="Term">
+          <Select
+            value={term?.id ?? "all"}
+            onValueChange={(v) => v && setTerm(v)}
+          >
             <SelectTrigger className="w-full">
-              <SelectValue placeholder="Select term" />
+              <SelectValue>
+                {term ? `Term ${term.term_number}` : "All terms"}
+              </SelectValue>
             </SelectTrigger>
             <SelectContent>
-              {terms.map((item) => (
-                <SelectItem key={item} value={item}>
-                  {item}
+              <SelectItem value="all">All terms</SelectItem>
+              {year?.terms.map((t) => (
+                <SelectItem key={t.id} value={t.id}>
+                  Term {t.term_number}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
-        </div>
+        </Field>
 
-        <div className="flex gap-1.5 items-center flex-1">
-          <label className="text-sm font-medium">Grade</label>
-          <Select value={grade} onValueChange={handleGradeChange}>
+        <Field label="Grade">
+          <Select
+            value={grade?.id ?? "all"}
+            onValueChange={(v) => v && setGrade(v)}
+          >
             <SelectTrigger className="w-full">
-              <SelectValue placeholder="All grades" />
+              <SelectValue>{grade?.name ?? "All grades"}</SelectValue>
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All grades</SelectItem>
-              {grades.map((item) => (
-                <SelectItem key={item} value={item}>
-                  {item}
+              {f.grades.map((g) => (
+                <SelectItem key={g.id} value={g.id}>
+                  {g.name}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
-        </div>
+        </Field>
 
-        <div className="flex gap-1.5 items-center flex-1">
-          <label className="text-sm font-medium">Stream</label>
+        <Field label="Stream">
           <Select
-            value={stream}
-            onValueChange={setStream}
-            disabled={grade === "all"}
+            value={stream?.id ?? "all"}
+            onValueChange={(v) => v && setStream(v)}
+            disabled={!grade}
           >
             <SelectTrigger className="w-full">
-              <SelectValue placeholder="All streams" />
+              <SelectValue>{stream?.name ?? "All streams"}</SelectValue>
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All streams</SelectItem>
-              {streams.map((item) => (
-                <SelectItem key={item} value={item}>
-                  {item}
+              {grade?.streams.map((s) => (
+                <SelectItem key={s.id} value={s.id}>
+                  {s.name}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
-        </div>
+        </Field>
       </div>
       <ScrollBar orientation="horizontal" />
     </ScrollArea>

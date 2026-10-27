@@ -11,6 +11,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   CalendarCheck,
   GraduationCap,
@@ -22,46 +23,63 @@ import {
 import Link from "next/link";
 import { Logo } from "@/components/logo";
 import { NavUser } from "./nav-user";
+import { useAccountQuery } from "@/hooks/use-account";
+import { tabs, getSlug } from "@/sections/students/id/content";
 
-const data = {
-  navMain: [
-    {
-      title: "Dashboard",
-      url: "/dashboard",
-      icon: <LayoutDashboardIcon />,
-    },
-    {
-      title: "Grades",
-      url: "/dashboard/grades",
-      icon: <GraduationCap />,
-    },
-    {
-      title: "Streams",
-      url: "/dashboard/streams",
-      icon: <Network />,
-    },
-    {
-      title: "Students",
-      url: "/dashboard/students",
-      icon: <Users />,
-    },
-    {
-      title: "Attendance",
-      url: "/dashboard/attendance",
-      icon: <CalendarCheck />,
-    },
-  ],
+const staffNavMain = [
+  {
+    title: "Dashboard",
+    url: "/dashboard",
+    icon: <LayoutDashboardIcon />,
+  },
+  {
+    title: "Grades",
+    url: "/dashboard/grades",
+    icon: <GraduationCap />,
+  },
+  {
+    title: "Streams",
+    url: "/dashboard/streams",
+    icon: <Network />,
+  },
+  {
+    title: "Students",
+    url: "/dashboard/students",
+    icon: <Users />,
+  },
+  {
+    title: "Attendance",
+    url: "/dashboard/attendance",
+    icon: <CalendarCheck />,
+  },
+];
 
-  navSecondary: [
-    {
-      title: "Account",
-      url: "/dashboard/account",
-      icon: <User />,
-    },
-  ],
-};
+const navSecondary = [
+  {
+    title: "Account",
+    url: "/dashboard/account",
+    icon: <User />,
+  },
+];
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const { data: account, isLoading } = useAccountQuery();
+
+  const isParent = account?.roles?.some(
+    (role) => role.toLowerCase() === "parent",
+  );
+
+  const parentNavMain = tabs.map(({ title, icon: Icon }) => {
+    const val = getSlug(title);
+    return {
+      title,
+      url: `/dashboard?tab=${val}`,
+      icon: <Icon />,
+    };
+  });
+
+  const activeNavMain = isParent ? parentNavMain : staffNavMain;
+
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
@@ -84,8 +102,17 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={data.navMain} />
-        <NavSecondary items={data.navSecondary} className="mt-auto" />
+        {isLoading ? (
+          <div className="flex flex-col gap-2 p-2">
+            <Skeleton className="h-9 w-full rounded-md" />
+            <Skeleton className="h-9 w-full rounded-md" />
+            <Skeleton className="h-9 w-full rounded-md" />
+            <Skeleton className="h-9 w-full rounded-md" />
+          </div>
+        ) : (
+          <NavMain items={activeNavMain} />
+        )}
+        <NavSecondary items={navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>
         <NavUser />

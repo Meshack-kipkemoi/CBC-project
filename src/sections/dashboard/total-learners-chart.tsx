@@ -1,8 +1,6 @@
 "use client";
 
-import { TrendingUp } from "lucide-react";
-import { CartesianGrid, Line, LineChart, XAxis } from "recharts";
-
+import { Bar, BarChart, CartesianGrid, XAxis } from "recharts";
 import {
   Card,
   CardContent,
@@ -17,70 +15,64 @@ import {
   ChartTooltipContent,
   type ChartConfig,
 } from "@/components/ui/chart";
-
-export const description = "A line chart";
-
-const chartData = [
-  { month: "January", desktop: 186 },
-  { month: "February", desktop: 305 },
-  { month: "March", desktop: 237 },
-  { month: "April", desktop: 73 },
-  { month: "May", desktop: 209 },
-  { month: "June", desktop: 214 },
-];
+import { Skeleton } from "@/components/ui/skeleton";
+import { cn } from "@/lib/utils";
+import { useDashboard } from "./dashboard-context";
 
 const chartConfig = {
-  desktop: {
-    label: "Desktop",
-    color: "var(--chart-1)",
-  },
+  learners: { label: "Learners", color: "var(--chart-1)" },
 } satisfies ChartConfig;
 
 export function TotalLearnersChart() {
+  const { query, scope, stale } = useDashboard();
+
+  if (query.isPending) return <Skeleton className="h-96 rounded-xl" />;
+  if (!query.data) return null;
+
+  const { learnersByClass, filters, stats } = query.data;
+  const byStream = filters.gradeId !== null;
+
   return (
-    <Card>
+    <Card className={cn("transition-opacity", stale && "opacity-60")}>
       <CardHeader>
         <CardTitle>Total Learners</CardTitle>
-        <CardDescription>January - June 2024</CardDescription>
+        <CardDescription>
+          Learners per {byStream ? `stream · ${scope.cohort}` : "grade"} ·{" "}
+          {scope.year}
+        </CardDescription>
       </CardHeader>
       <CardContent>
-        <ChartContainer config={chartConfig}>
-          <LineChart
-            accessibilityLayer
-            data={chartData}
-            margin={{
-              left: 12,
-              right: 12,
-            }}
-          >
-            <CartesianGrid vertical={false} />
-            <XAxis
-              dataKey="month"
-              tickLine={false}
-              axisLine={false}
-              tickMargin={8}
-              tickFormatter={(value) => value.slice(0, 3)}
-            />
-            <ChartTooltip
-              cursor={false}
-              content={<ChartTooltipContent hideLabel />}
-            />
-            <Line
-              dataKey="desktop"
-              type="natural"
-              stroke="var(--color-desktop)"
-              strokeWidth={2}
-              dot={false}
-            />
-          </LineChart>
-        </ChartContainer>
+        {learnersByClass.length === 0 ? (
+          <p className="py-16 text-center text-sm text-muted-foreground">
+            No learners enrolled for this selection.
+          </p>
+        ) : (
+          <ChartContainer config={chartConfig}>
+            <BarChart
+              accessibilityLayer
+              data={learnersByClass}
+              margin={{ left: 12, right: 12 }}
+            >
+              <CartesianGrid vertical={false} />
+              <XAxis
+                dataKey="label"
+                tickLine={false}
+                axisLine={false}
+                tickMargin={8}
+              />
+              <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
+              <Bar dataKey="learners" fill="var(--color-learners)" radius={8} />
+            </BarChart>
+          </ChartContainer>
+        )}
       </CardContent>
-      <CardFooter className="flex-col items-start gap-2 text-sm">
-        <div className="flex gap-2 leading-none font-medium">
-          Trending up by 5.2% this month <TrendingUp className="h-4 w-4" />
+      <CardFooter className="flex-col items-start gap-1 text-sm">
+        <div className="font-medium">
+          {stats.learners.toLocaleString()} learner
+          {stats.learners === 1 ? "" : "s"} in total
         </div>
-        <div className="leading-none text-muted-foreground">
-          Showing total visitors for the last 6 months
+        <div className="text-muted-foreground">
+          Based on each learner&apos;s latest enrollment in {scope.year}
         </div>
       </CardFooter>
     </Card>

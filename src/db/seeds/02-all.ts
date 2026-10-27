@@ -1004,6 +1004,125 @@ export default async function seed() {
     throw new Error("A stream has no enrolled students.");
   }
 
+  // ---------------------------------------------------------------------------
+  console.log("Seeding Attendance Sessions & Records...");
+
+  type AttendanceStatus = "present" | "absent" | "late" | "excused";
+
+  const ATTENDANCE_WEIGHTS: { status: AttendanceStatus; weight: number }[] = [
+    { status: "present", weight: 0.85 },
+    { status: "late", weight: 0.08 },
+    { status: "absent", weight: 0.05 },
+    { status: "excused", weight: 0.02 },
+  ];
+
+  function getRandomAttendanceStatus(): AttendanceStatus {
+    const roll = faker.number.float({ min: 0, max: 1 });
+    let cumulative = 0;
+    for (const item of ATTENDANCE_WEIGHTS) {
+      cumulative += item.weight;
+      if (roll <= cumulative) return item.status;
+    }
+    return "present";
+  }
+
+  // Map each stream to its class teacher (the person who "took" attendance).
+  const classTeacherByStream = new Map<string, string>();
+  for (const row of classTeacherRows) {
+    classTeacherByStream.set(row.streamId, row.teacherId);
+  }
+
+  // Group students by stream so records can be generated per session.
+  const studentsByStreamId = new Map<string, string[]>();
+  for (const enr of enrollmentValues) {
+    const list = studentsByStreamId.get(enr.streamId) ?? [];
+    list.push(enr.studentId);
+    studentsByStreamId.set(enr.streamId, list);
+  }
+
+  const attendanceSessionValues: (typeof schema.attendanceSessions.$inferInsert)[] =
+    [];
+
+  // Walk each term's calendar, skipping weekends. For every active school
+  // day there is a ~35% chance a given stream held a roll-call session,
+  // which keeps the seeded volume realistic.
+  for (const term of terms) {
+    const termStart = new Date(`${term.startDate}T08:00:00+03:00`);
+    const termEnd = new Date(`${term.endDate}T16:00:00+03:00`);
+
+    const currentDay = new Date(termStart);
+    while (currentDay <= termEnd) {
+      const dayOfWeek = currentDay.getDay();
+      if (dayOfWeek !== 0 && dayOfWeek !== 6) {
+        for (const stream of streams) {
+          if (!studentsByStreamId.has(stream.id)) continue;
+
+          if (faker.number.float({ min: 0, max: 1 }) < 0.35) {
+            attendanceSessionValues.push({
+              schoolId: school.id,
+              academicYearId: academicYear.id,
+              termId: term.id, // ✅ was muxTermId
+              streamId: stream.id,
+              // Null learningAreaId = class/homeroom session.
+              takenBy: classTeacherByStream.get(stream.id) ?? principal.id, // ✅ was teacherId
+              sessionDate: currentDay.toISOString().slice(0, 10),
+              createdAt: new Date(currentDay),
+            });
+          }
+        }
+      }
+      currentDay.setDate(currentDay.getDate() + 2);
+    }
+  }
+
+  const attendanceSessions: (typeof schema.attendanceSessions.$inferSelect)[] =
+    [];
+  for (const batch of chunk(attendanceSessionValues, INSERT_CHUNK_SIZE)) {
+    const inserted = await db
+      .insert(schema.attendanceSessions)
+      .values(batch)
+      .returning();
+    attendanceSessions.push(...inserted);
+  }
+
+  console.log(
+    `Created ${attendanceSessions.length} attendance sessions. Generating attendance records...`,
+  );
+
+  const attendanceRecordValues: (typeof schema.attendanceRecords.$inferInsert)[] =
+    [];
+
+  for (const session of attendanceSessions) {
+    const streamStudents = studentsByStreamId.get(session.streamId) ?? [];
+
+    for (const studentId of streamStudents) {
+      const status = getRandomAttendanceStatus();
+
+      attendanceRecordValues.push({
+        sessionId: session.id,
+        studentId,
+        status,
+        // ✅ was `remarks`; this table only has a nullable `note` column.
+        // No recordedBy / createdAt — they don't exist on this table.
+        note:
+          status === "excused" || status === "late"
+            ? faker.helpers.arrayElement([
+                "Excused by class teacher",
+                "Arrived late due to transport",
+              ])
+            : null,
+      });
+    }
+  }
+
+  for (const batch of chunk(attendanceRecordValues, RESULT_CHUNK_SIZE)) {
+    await db.insert(schema.attendanceRecords).values(batch);
+  }
+
+  console.log(
+    `✅ Seeded ${attendanceRecordValues.length} attendance records successfully.`,
+  );
+
   console.log(
     `📊 ${grades.length} grades, ${streams.length} streams, ` +
       `${students.length} students, ${parents.length} parents, ` +

@@ -8,7 +8,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { cn } from "@/lib/utils";
 
 export function NavMain({
@@ -21,6 +21,8 @@ export function NavMain({
   }[];
 }) {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const currentTab = searchParams.get("tab");
   const { setOpenMobile } = useSidebar();
 
   return (
@@ -28,10 +30,18 @@ export function NavMain({
       <SidebarGroupContent>
         <SidebarMenu className="gap-2">
           {items.map((item) => {
-            const isActive =
-              item.url !== "/dashboard"
-                ? pathname.startsWith(item.url)
-                : pathname === item.url;
+            const urlObj = new URL(item.url, "http://localhost");
+            const itemTab = urlObj.searchParams.get("tab");
+
+            let isActive = false;
+            if (item.url.includes("?tab=")) {
+              isActive = pathname === urlObj.pathname && currentTab === itemTab;
+            } else {
+              isActive =
+                item.url !== "/dashboard"
+                  ? pathname.startsWith(item.url)
+                  : pathname === item.url && !currentTab;
+            }
 
             return (
               <SidebarMenuItem key={item.title}>

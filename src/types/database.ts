@@ -130,6 +130,124 @@ export type Database = {
           },
         ]
       }
+      attendance_records: {
+        Row: {
+          id: string
+          note: string | null
+          session_id: string
+          status: Database["public"]["Enums"]["attendance_status"]
+          student_id: string
+        }
+        Insert: {
+          id?: string
+          note?: string | null
+          session_id: string
+          status: Database["public"]["Enums"]["attendance_status"]
+          student_id: string
+        }
+        Update: {
+          id?: string
+          note?: string | null
+          session_id?: string
+          status?: Database["public"]["Enums"]["attendance_status"]
+          student_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "attendance_records_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "attendance_sessions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendance_records_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      attendance_sessions: {
+        Row: {
+          academic_year_id: string
+          created_at: string
+          id: string
+          learning_area_id: string | null
+          school_id: string
+          session_date: string
+          stream_id: string
+          taken_by: string
+          term_id: string
+        }
+        Insert: {
+          academic_year_id: string
+          created_at?: string
+          id?: string
+          learning_area_id?: string | null
+          school_id: string
+          session_date: string
+          stream_id: string
+          taken_by: string
+          term_id: string
+        }
+        Update: {
+          academic_year_id?: string
+          created_at?: string
+          id?: string
+          learning_area_id?: string | null
+          school_id?: string
+          session_date?: string
+          stream_id?: string
+          taken_by?: string
+          term_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "attendance_sessions_academic_year_id_fkey"
+            columns: ["academic_year_id"]
+            isOneToOne: false
+            referencedRelation: "academic_years"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendance_sessions_learning_area_id_fkey"
+            columns: ["learning_area_id"]
+            isOneToOne: false
+            referencedRelation: "learning_areas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendance_sessions_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendance_sessions_stream_id_fkey"
+            columns: ["stream_id"]
+            isOneToOne: false
+            referencedRelation: "streams"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendance_sessions_taken_by_fkey"
+            columns: ["taken_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendance_sessions_term_id_fkey"
+            columns: ["term_id"]
+            isOneToOne: false
+            referencedRelation: "terms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       class_teacher_assignments: {
         Row: {
           academic_year_id: string
@@ -691,6 +809,39 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      attendance_access: { Args: never; Returns: string }
+      attendance_overview: {
+        Args: {
+          p_grade_id?: string
+          p_learning_area_id?: string
+          p_term_id?: string
+          p_year_id: string
+        }
+        Returns: Json
+      }
+      dashboard_overview: {
+        Args: {
+          p_below_threshold?: number
+          p_grade_id?: string
+          p_stream_id?: string
+          p_term_id?: string
+          p_year_id: string
+        }
+        Returns: Json
+      }
+      grades_report: {
+        Args: {
+          p_pairs?: Json
+          p_stream_ids?: string[]
+          p_term_id?: string
+          p_year_id?: string
+        }
+        Returns: Json
+      }
+      is_class_teacher_of_school: {
+        Args: { p_school_id: string; p_user_id: string }
+        Returns: boolean
+      }
       is_class_teacher_of_stream: {
         Args: { p_stream_id: string; p_user_id: string; p_year_id: string }
         Returns: boolean
@@ -703,12 +854,28 @@ export type Database = {
         Args: { p_student_id: string; p_user_id: string }
         Returns: boolean
       }
+      is_class_teacher_of_term: {
+        Args: { p_term_id: string; p_user_id: string }
+        Returns: boolean
+      }
       is_principal_of: {
         Args: { p_school_id: string; p_user_id: string }
         Returns: boolean
       }
+      is_principal_of_profile: {
+        Args: { p_profile_id: string; p_user_id: string }
+        Returns: boolean
+      }
       is_principal_of_stream: {
         Args: { p_stream_id: string; p_user_id: string }
+        Returns: boolean
+      }
+      is_principal_of_term: {
+        Args: { p_term_id: string; p_user_id: string }
+        Returns: boolean
+      }
+      is_subject_teacher_of_school: {
+        Args: { p_school_id: string; p_user_id: string }
         Returns: boolean
       }
       is_subject_teacher_of_stream: {
@@ -719,9 +886,26 @@ export type Database = {
         Args: { p_student_id: string; p_user_id: string }
         Returns: boolean
       }
+      is_subject_teacher_of_term: {
+        Args: { p_term_id: string; p_user_id: string }
+        Returns: boolean
+      }
       is_verified_parent_of: {
         Args: { p_student_id: string; p_user_id: string }
         Returns: boolean
+      }
+      is_verified_parent_of_school: {
+        Args: { p_school_id: string; p_user_id: string }
+        Returns: boolean
+      }
+      is_verified_parent_of_term: {
+        Args: { p_term_id: string; p_user_id: string }
+        Returns: boolean
+      }
+      streams_access: { Args: never; Returns: string }
+      streams_overview: {
+        Args: { p_grade_id?: string; p_term_id?: string; p_year_id: string }
+        Returns: Json
       }
       student_school: { Args: { p_student_id: string }; Returns: string }
     }
@@ -732,6 +916,7 @@ export type Database = {
         | "Classroom Assessment"
         | "School Based Assessment"
         | "National Examinations"
+      attendance_status: "present" | "absent" | "late" | "excused"
       student_status: "active" | "transferred" | "graduated" | "inactive"
       verification_status: "pending" | "verified" | "rejected"
     }
@@ -868,6 +1053,7 @@ export const Constants = {
         "School Based Assessment",
         "National Examinations",
       ],
+      attendance_status: ["present", "absent", "late", "excused"],
       student_status: ["active", "transferred", "graduated", "inactive"],
       verification_status: ["pending", "verified", "rejected"],
     },

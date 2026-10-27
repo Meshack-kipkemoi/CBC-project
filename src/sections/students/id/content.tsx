@@ -46,10 +46,32 @@ export const getSlug = (title: string) =>
 export function Content({
   id,
   defaultTab,
+  showTabs = true,
 }: {
   id: string;
   defaultTab: string;
+  showTabs?: boolean;
 }) {
+  if (!showTabs) {
+    return (
+      <>
+        {tabs
+          .filter(({ title }) => getSlug(title) === defaultTab)
+          .map(({ title, content: Content }) => {
+            const val = getSlug(title);
+            return (
+              <div
+                key={val}
+                className="relative animate-in fade-in-0 slide-in-from-bottom-2 duration-300"
+              >
+                {<Content id={id} />}
+              </div>
+            );
+          })}
+      </>
+    );
+  }
+
   return (
     <Tabs defaultValue={defaultTab} className="gap-4">
       <TabsList className="group-data-horizontal/tabs:h-auto gap-1 overflow-x-auto p-1.5 backdrop-blur scrollbar-none [&::-webkit-scrollbar]:hidden w-full lg:w-fit">
