@@ -1,3 +1,4 @@
+import { AccountPage } from "@/sections/account/account";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -5,5 +6,5 @@ export const metadata: Metadata = {
 };
 
 export default function AccountsPage() {
-  return <div>Accounts</div>;
+  return <AccountPage />;
 }

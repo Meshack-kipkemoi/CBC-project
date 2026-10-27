@@ -52,7 +52,7 @@ export function Content({
 }) {
   return (
     <Tabs defaultValue={defaultTab} className="gap-4">
-      <TabsList className="group-data-horizontal/tabs:h-auto gap-1 overflow-x-auto p-1.5 backdrop-blur [scrollbar-width:none] [&::-webkit-scrollbar]:hidden w-full lg:w-fit">
+      <TabsList className="group-data-horizontal/tabs:h-auto gap-1 overflow-x-auto p-1.5 backdrop-blur scrollbar-none [&::-webkit-scrollbar]:hidden w-full lg:w-fit">
         {tabs.map(({ title, icon: Icon, description }) => {
           const val = getSlug(title);
           return (

@@ -18,11 +18,17 @@ export const profiles = pgTable(
       .defaultNow()
       .notNull(),
   },
-  () => [
+  (table) => [
     pgPolicy("select_own_profile", {
       for: "select",
       to: authenticatedRole,
       using: sql`profiles.id = ${uid}`,
+    }),
+    pgPolicy("profiles_update_own", {
+      for: "update",
+      to: authenticatedRole,
+      using: sql`${table.id} = ${uid}`,
+      withCheck: sql`${table.id} = ${uid}`,
     }),
     pgPolicy("principal_selects_all", {
       for: "select",

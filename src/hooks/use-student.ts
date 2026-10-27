@@ -1,14 +1,15 @@
 import { useQuery } from "@tanstack/react-query";
-import type { StudentProfile } from "@/lib/queries/student/profile";
+import type { StudentProfile } from "@/lib/student/queries/profile";
 import type { ApiResponse } from "@/lib/api";
-import { SubjectPerformanceData } from "@/lib/queries/student/subject-performance";
+import { SubjectPerformanceData } from "@/lib/student/queries/subject-performance";
+import type { ReadinessReport } from "@/lib/student/data/pathways";
 
-export type { StudentProfile } from "@/lib/queries/student/profile";
+export type { StudentProfile } from "@/lib/student/queries/profile";
 export type {
   SubjectPerformanceData,
   SubjectSummary,
   AssessmentPoint,
-} from "@/lib/queries/student/subject-performance";
+} from "@/lib/student/queries/subject-performance";
 
 type StudentTab =
   | "profile"
@@ -20,7 +21,7 @@ type TabData = {
   profile: StudentProfile;
   "subject-performance": SubjectPerformanceData;
   "core-competencies": StudentProfile;
-  "pathway-readiness": StudentProfile;
+  "pathway-readiness": ReadinessReport;
 };
 
 export function useStudentQuery<Tab extends StudentTab>(id: string, tab: Tab) {

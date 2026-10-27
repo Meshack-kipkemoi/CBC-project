@@ -20,7 +20,7 @@ import {
   InputGroupAddon,
   InputGroupInput,
 } from "@/components/ui/input-group";
-import { PAGE_SIZE } from "@/lib/queries/students";
+import { PAGE_SIZE } from "@/lib/students/queries";
 
 export function StudentsTable() {
   const [input, setInput] = useState("");

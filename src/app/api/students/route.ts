@@ -6,7 +6,7 @@ import {
   PAGE_SIZE,
   studentsQuery,
   type StudentsResults,
-} from "@/lib/queries/students";
+} from "@/lib/students/queries";
 import { createResponse } from "@/lib/api";
 
 export async function GET(req: NextRequest) {

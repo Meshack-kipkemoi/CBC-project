@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
-import type { StudentRow } from "@/lib/queries/students";
+import type { StudentRow } from "@/lib/students/queries";
 
 export type TableStudent = StudentRow & { rowNumber: number };
 

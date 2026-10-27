@@ -268,7 +268,7 @@ function AtRiskCard({
           Subjects at risk
         </CardTitle>
         <CardDescription>
-          Dropped 30+ points since the last assessment
+          Dropped 20+ points since the last assessment
         </CardDescription>
       </CardHeader>
       <CardContent>

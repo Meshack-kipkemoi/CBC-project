@@ -337,7 +337,7 @@ export function Profile({ id }: { id: string }) {
                     <li key={enrollment.id} className="relative">
                       <span
                         className={cn(
-                          "absolute -left-[31px] top-1.5 size-3 rounded-full border-2 border-background",
+                          "absolute -left-7.75 top-1.5 size-3 rounded-full border-2 border-background",
                           isCurrent
                             ? "bg-primary ring-4 ring-primary/20"
                             : "bg-muted-foreground/40",

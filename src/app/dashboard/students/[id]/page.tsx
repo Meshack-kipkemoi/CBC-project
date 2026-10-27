@@ -1,5 +1,5 @@
 import { BreadcrumbLabel } from "@/layouts/app-breadcrumb";
-import { getStudent } from "@/lib/queries/student/profile";
+import { getStudent } from "@/lib/student/queries/profile";
 import { Content, getSlug, tabs } from "@/sections/students/id/content";
 import { Metadata } from "next";
 import { notFound } from "next/navigation";

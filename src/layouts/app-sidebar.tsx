@@ -13,7 +13,6 @@ import {
 } from "@/components/ui/sidebar";
 import {
   CalendarCheck,
-  FileText,
   GraduationCap,
   LayoutDashboardIcon,
   Network,
@@ -50,11 +49,6 @@ const data = {
       title: "Attendance",
       url: "/dashboard/attendance",
       icon: <CalendarCheck />,
-    },
-    {
-      title: "Reports",
-      url: "/dashboard/reports",
-      icon: <FileText />,
     },
   ],
 
