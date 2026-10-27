@@ -1,10 +1,10 @@
 // hooks/use-students.ts
 
 import { InfiniteData, useInfiniteQuery } from "@tanstack/react-query";
-import type { StudentsResults } from "@/lib/queries/students";
+import type { StudentsResults } from "@/lib/students/queries";
 import { ApiResponse } from "@/lib/api";
 
-export type { StudentRow, StudentsResults } from "@/lib/queries/students";
+export type { StudentRow, StudentsResults } from "@/lib/students/queries";
 
 export function useStudentsQuery(search: string) {
   return useInfiniteQuery<

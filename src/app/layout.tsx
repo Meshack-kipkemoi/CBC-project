@@ -1,4 +1,3 @@
-import { Analytics } from "@vercel/analytics/next";
 import type { Metadata } from "next";
 import { Roboto, Public_Sans } from "next/font/google";
 import "./globals.css";
@@ -47,7 +46,6 @@ export default function RootLayout({
             {children}
           </QueryProvider>
         </ThemeProvider>
-        {process.env.NODE_ENV === "production" && <Analytics />}
       </body>
     </html>
   );
