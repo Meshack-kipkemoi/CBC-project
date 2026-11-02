@@ -12,6 +12,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { ThemeToggleCircular } from "@/components/ui/theme-toggle-circular";
+import { cn } from "@/lib/utils";
 
 const themes = [
   { value: "light", label: "Light", icon: Sun },
@@ -19,7 +20,11 @@ const themes = [
   { value: "system", label: "System", icon: Laptop },
 ] as const;
 
-export function ModeToggle() {
+export function ModeToggle({
+  variant,
+  className,
+  ...props
+}: React.ComponentProps<typeof Button>) {
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = React.useState(false);
 
@@ -31,10 +36,12 @@ export function ModeToggle() {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button
-          variant="ghost"
+          variant={variant ?? "ghost"}
           size="icon"
           title="Change theme"
           id="theme-anchor"
+          className={cn(className)}
+          {...props}
         >
           {mounted ? <CurrentIcon /> : <Laptop />}
           <span className="sr-only">Toggle theme</span>

@@ -13,6 +13,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Logo } from "@/components/logo";
+import { ModeToggle } from "@/layouts/mode-toggle";
 
 function FadeIn({
   children,
@@ -161,12 +162,15 @@ export default function Page() {
             </a>
           </nav>
 
-          <Button asChild size="sm">
-            <Link href="/auth/login">
-              Sign in
-              <ArrowRight className="size-4" />
-            </Link>
-          </Button>
+          <div className="flex gap-2 items-center">
+            <ModeToggle variant={"outline"} />
+            <Button asChild size="sm">
+              <Link href="/auth/login">
+                Sign in
+                <ArrowRight className="size-4" />
+              </Link>
+            </Button>
+          </div>
         </div>
       </header>
 
