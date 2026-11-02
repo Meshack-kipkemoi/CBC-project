@@ -1,0 +1,11 @@
+ALTER POLICY "class_teacher_assignments_select_principal" ON "class_teacher_assignments" TO authenticated USING (is_principal_of_stream((select auth.uid()), class_teacher_assignments.stream_id));--> statement-breakpoint
+ALTER POLICY "parent_students_select_principal" ON "parent_students" TO authenticated USING (is_principal_of((select auth.uid()), student_school(parent_students.student_id)));--> statement-breakpoint
+ALTER POLICY "enrollments_select_principal" ON "student_enrollments" TO authenticated USING (is_principal_of_stream((select auth.uid()), student_enrollments.stream_id));--> statement-breakpoint
+ALTER POLICY "enrollments_select_class_teacher" ON "student_enrollments" TO authenticated USING (is_class_teacher_of_stream((select auth.uid()), student_enrollments.stream_id, student_enrollments.academic_year_id));--> statement-breakpoint
+ALTER POLICY "enrollments_select_subject_teacher" ON "student_enrollments" TO authenticated USING (is_subject_teacher_of_stream((select auth.uid()), student_enrollments.stream_id, student_enrollments.academic_year_id));--> statement-breakpoint
+ALTER POLICY "enrollments_select_parent" ON "student_enrollments" TO authenticated USING (is_verified_parent_of((select auth.uid()), student_enrollments.student_id));--> statement-breakpoint
+ALTER POLICY "students_select_principal" ON "students" TO authenticated USING (is_principal_of((select auth.uid()), students.school_id));--> statement-breakpoint
+ALTER POLICY "students_select_class_teacher" ON "students" TO authenticated USING (is_class_teacher_of_student((select auth.uid()), students.id));--> statement-breakpoint
+ALTER POLICY "students_select_subject_teacher" ON "students" TO authenticated USING (is_subject_teacher_of_student((select auth.uid()), students.id));--> statement-breakpoint
+ALTER POLICY "students_select_parent" ON "students" TO authenticated USING (is_verified_parent_of((select auth.uid()), students.id));--> statement-breakpoint
+ALTER POLICY "subject_teacher_assignments_select_principal" ON "subject_teacher_assignments" TO authenticated USING (is_principal_of_stream((select auth.uid()), subject_teacher_assignments.stream_id));

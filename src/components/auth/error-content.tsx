@@ -68,9 +68,16 @@ export default function ErrorContent() {
         )}
       </CardContent>
       <CardFooter className="flex gap-2">
-        <Button className="flex-2" variant="default" render={<Link href="/auth/login" />} nativeButton={false}>Sign In <ArrowRight /></Button>
-        <Button className="flex-1" variant="secondary" render={<Link href="/" className="flex items-center gap-2" />} nativeButton={false}>Go Home
-                        </Button>
+        <Button className="flex-2" variant="default" asChild>
+          <Link href="/auth/login">
+            Sign In <ArrowRight />
+          </Link>
+        </Button>
+        <Button className="flex-1" variant="secondary">
+          <Link href="/" className="flex items-center gap-2">
+            Go Home
+          </Link>
+        </Button>
       </CardFooter>
     </Card>
   );

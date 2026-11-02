@@ -1,0 +1,1 @@
+CREATE POLICY "principal_selects_all" ON "profiles" AS PERMISSIVE FOR SELECT TO "authenticated" USING (is_principal_of_profile((select auth.uid()), profiles.id));

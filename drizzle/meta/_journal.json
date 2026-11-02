@@ -1,0 +1,216 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1791998991537,
+      "tag": "0000_gigantic_randall",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1792006006244,
+      "tag": "0001_dapper_sage",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1793003399745,
+      "tag": "0002_loving_marvel_zombies",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1793006726161,
+      "tag": "0003_daffy_cloak",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1793008230117,
+      "tag": "0004_workable_rafael_vega",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1793013209713,
+      "tag": "0005_is_principal_func",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1793013281892,
+      "tag": "0006_lethal_stephen_strange",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1793014138261,
+      "tag": "0007_helper_functions",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1793015016353,
+      "tag": "0008_powerful_outlaw_kid",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1793024783640,
+      "tag": "0009_class_teacher_func",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1793024899988,
+      "tag": "0010_pink_george_stacy",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1793028667488,
+      "tag": "0011_stream_rls",
+      "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1793031254718,
+      "tag": "0012_open_sway",
+      "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1793031658513,
+      "tag": "0013_terms_helper_funcs",
+      "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1793031761064,
+      "tag": "0014_flowery_thaddeus_ross",
+      "breakpoints": true
+    },
+    {
+      "idx": 15,
+      "version": "7",
+      "when": 1793032796743,
+      "tag": "0015_cooing_excalibur",
+      "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "7",
+      "when": 1793033135359,
+      "tag": "0016_principal_profile_helper_func",
+      "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1793033233670,
+      "tag": "0017_great_mandarin",
+      "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1793033661882,
+      "tag": "0018_reflective_thor_girl",
+      "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1793033861643,
+      "tag": "0019_cuddly_sentinel",
+      "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1793086687569,
+      "tag": "0020_past_mesmero",
+      "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1793087069051,
+      "tag": "0021_moaning_cerebro",
+      "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "7",
+      "when": 1793088221527,
+      "tag": "0022_grades_report",
+      "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1793105535460,
+      "tag": "0023_dashboard_overview",
+      "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1793106850789,
+      "tag": "0024_stream_overview",
+      "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1793109542137,
+      "tag": "0025_attendance_overview",
+      "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "7",
+      "when": 1793110031207,
+      "tag": "0026_attendance_overview_review1",
+      "breakpoints": true
+    },
+    {
+      "idx": 27,
+      "version": "7",
+      "when": 1793110932157,
+      "tag": "0027_remove_attendance_tables",
+      "breakpoints": true
+    },
+    {
+      "idx": 28,
+      "version": "7",
+      "when": 1793111438348,
+      "tag": "0028_powerful_ezekiel_stane",
+      "breakpoints": true
+    },
+    {
+      "idx": 29,
+      "version": "7",
+      "when": 1793111892685,
+      "tag": "0029_careless_newton_destine",
+      "breakpoints": true
+    }
+  ]
+}

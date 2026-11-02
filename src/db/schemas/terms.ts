@@ -5,9 +5,17 @@ import {
   date,
   unique,
   check,
+  pgPolicy,
 } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 import { academicYears } from "./academic-years";
+import { authenticatedRole } from "drizzle-orm/supabase";
+import {
+  isClassTeacherOfTerm,
+  isPrincipalOfTerm,
+  isSubjectTeacherOfTerm,
+  isVerifiedParentOfTerm,
+} from "./rls";
 
 // Terms and curriculum
 export const terms = pgTable(
@@ -25,5 +33,26 @@ export const terms = pgTable(
     unique().on(table.academicYearId, table.termNumber),
     check("terms_number_check", sql`${table.termNumber} between 1 and 3`),
     check("terms_dates_check", sql`${table.startDate} <= ${table.endDate}`),
+
+    pgPolicy("terms_select_principal", {
+      for: "select",
+      to: authenticatedRole,
+      using: isPrincipalOfTerm("terms.id"),
+    }),
+    pgPolicy("terms_select_class_teacher", {
+      for: "select",
+      to: authenticatedRole,
+      using: isClassTeacherOfTerm("terms.id"),
+    }),
+    pgPolicy("terms_select_subject_teacher", {
+      for: "select",
+      to: authenticatedRole,
+      using: isSubjectTeacherOfTerm("terms.id"),
+    }),
+    pgPolicy("terms_select_parent", {
+      for: "select",
+      to: authenticatedRole,
+      using: isVerifiedParentOfTerm("terms.id"),
+    }),
   ],
 );

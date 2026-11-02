@@ -1,7 +1,17 @@
-import { pgTable, uuid, timestamp, unique, index } from "drizzle-orm/pg-core";
+import {
+  pgTable,
+  uuid,
+  timestamp,
+  unique,
+  index,
+  pgPolicy,
+} from "drizzle-orm/pg-core";
 import { profiles } from "./profiles";
 import { roles } from "./roles";
 import { schools } from "./schools";
+import { authenticatedRole } from "drizzle-orm/supabase";
+import { sql } from "drizzle-orm";
+import { uid } from "./rls";
 
 export const userRoles = pgTable(
   "user_roles",
@@ -25,5 +35,10 @@ export const userRoles = pgTable(
   (table) => [
     unique().on(table.userId, table.roleId, table.schoolId),
     index("user_roles_user_idx").on(table.userId),
+    pgPolicy("user_roles_select_own", {
+      for: "select",
+      to: authenticatedRole,
+      using: sql`user_roles.user_id = ${uid}`,
+    }),
   ],
 );

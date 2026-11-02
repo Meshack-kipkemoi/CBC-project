@@ -41,37 +41,29 @@ export async function updateSession(request: NextRequest) {
 
   const pathname = request.nextUrl.pathname;
 
-  const protectedRoutes = ["/protected"];
+  const protectedRoutes = ["/dashboard"];
 
-  // 1. Target specifically the dashboard routes
   const isProtectedRoute = protectedRoutes.some((route) =>
     pathname.startsWith(route),
   );
   const isAuthRoute = pathname.startsWith("/auth");
 
-  // 2. PROTECT PROTECTED ROUTES: If trying to access protected routes without a session
   if (isProtectedRoute && (!user?.claims || error)) {
     const url = request.nextUrl.clone();
     url.pathname = `/auth/login`;
-    // Optional: add a redirect param to bring them back after login
     url.searchParams.set("next", pathname);
     return NextResponse.redirect(url);
   }
 
-  // 4. REDIRECT LOGGED IN USERS: If logged in but hitting /auth pages
   if (user && isAuthRoute) {
     const url = request.nextUrl.clone();
 
-    // Check if there is a ?next=/path in the URL
     const nextParam = request.nextUrl.searchParams.get("next");
 
     if (nextParam) {
-      // If ?next exists, forward them to that specific path
       url.pathname = nextParam;
-      // Clean up the search param so it doesn't stay in the address bar
       url.searchParams.delete("next");
     } else {
-      // Default fallback if no ?next is present
       url.pathname = protectedRoutes[0];
     }
 

@@ -1,0 +1,2 @@
+ALTER TABLE "profiles" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
+CREATE POLICY "select_own_profile" ON "profiles" AS PERMISSIVE FOR SELECT TO "authenticated" USING (profiles.id = (select auth.uid()));

@@ -1,0 +1,9 @@
+ALTER TABLE "academic_years" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
+DROP POLICY "streams_select_school_members" ON "streams" CASCADE;--> statement-breakpoint
+CREATE POLICY "academic_years_select_principal" ON "academic_years" AS PERMISSIVE FOR SELECT TO "authenticated" USING (is_principal_of((select auth.uid()), academic_years.school_id));--> statement-breakpoint
+CREATE POLICY "academic_years_select_class_teacher" ON "academic_years" AS PERMISSIVE FOR SELECT TO "authenticated" USING (is_class_teacher_of_school((select auth.uid()), academic_years.school_id));--> statement-breakpoint
+CREATE POLICY "academic_years_select_subject_teacher" ON "academic_years" AS PERMISSIVE FOR SELECT TO "authenticated" USING (is_subject_teacher_of_school((select auth.uid()), academic_years.school_id));--> statement-breakpoint
+CREATE POLICY "academic_years_select_parent" ON "academic_years" AS PERMISSIVE FOR SELECT TO "authenticated" USING (is_verified_parent_of_school((select auth.uid()), academic_years.school_id));--> statement-breakpoint
+CREATE POLICY "streams_select_class_teacher" ON "streams" AS PERMISSIVE FOR SELECT TO "authenticated" USING (is_class_teacher_of_school((select auth.uid()), (select g.school_id from grades g where g.id = streams.grade_id)));--> statement-breakpoint
+CREATE POLICY "streams_select_subject_teacher" ON "streams" AS PERMISSIVE FOR SELECT TO "authenticated" USING (is_subject_teacher_of_school((select auth.uid()), (select g.school_id from grades g where g.id = streams.grade_id)));--> statement-breakpoint
+CREATE POLICY "streams_select_parent" ON "streams" AS PERMISSIVE FOR SELECT TO "authenticated" USING (is_verified_parent_of_school((select auth.uid()), (select g.school_id from grades g where g.id = streams.grade_id)));
