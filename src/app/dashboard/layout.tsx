@@ -4,8 +4,10 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { AppBreadcrumb } from "@/layouts/app-breadcrumb";
 import { AppHeader } from "@/layouts/app-header";
 import { AppSidebar } from "@/layouts/app-sidebar";
+import { getUserRole } from "@/lib/auth/get-user-role";
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 
 export const metadata: Metadata = {
   title: "Dashboard",
@@ -20,6 +22,15 @@ export default async function DashboardLayout({
   const cookieStore = await cookies();
   const sidebarState = cookieStore.get("sidebar_state");
   const defaultOpen = sidebarState ? sidebarState.value === "true" : true;
+
+  const userData = await getUserRole();
+
+  if (!userData) {
+    redirect("/auth/login");
+  }
+
+  const { isParent } = userData;
+
   return (
     <SidebarProvider
       style={
@@ -35,7 +46,10 @@ export default async function DashboardLayout({
         <SidebarInset>
           <AppHeader />
           <BreadcrumbProvider>
-            <div className="flex-1 space-y-6 bg-muted/40 dark:bg-muted/80 p-4">
+            <div
+              className="group/dashboard flex-1 space-y-6 bg-muted/40 dark:bg-muted/80 p-4"
+              data-role={isParent ? "parent" : "staff"}
+            >
               <AppBreadcrumb />
               {children}
             </div>

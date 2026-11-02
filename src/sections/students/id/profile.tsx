@@ -228,7 +228,7 @@ export function Profile({ id }: { id: string }) {
   return (
     <div className="space-y-4">
       {/* Header */}
-      <Card className="pt-14 bg-transparent shadow-none ring-0">
+      <Card className="pt-14 group-data-[role=parent]/dashboard:pt-7 bg-transparent shadow-none ring-0 group-data-[role=parent]/dashboard:overflow-visible">
         <CardContent className="flex flex-col gap-4 sm:flex-row items-center rounded-xl bg-card border-2 dark:border-foreground/50 pt-8 pb-4 sm:py-4">
           <div className="-mt-16 rounded-[calc(var(--radius)*3.5)] p-0.5 bg-linear-to-b from-border dark:from-foreground/50 from-50% to-transparent to-50%">
             <div className=" flex size-14 items-center justify-center rounded-[inherit]  bg-primary text-xl font-semibold text-primary-foreground">

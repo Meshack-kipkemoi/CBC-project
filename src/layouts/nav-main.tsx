@@ -35,7 +35,9 @@ export function NavMain({
 
             let isActive = false;
             if (item.url.includes("?tab=")) {
-              isActive = pathname === urlObj.pathname && currentTab === itemTab;
+              isActive =
+                currentTab === itemTab ||
+                (!currentTab && itemTab === "profile");
             } else {
               isActive =
                 item.url !== "/dashboard"
