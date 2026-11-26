@@ -1,10 +1,12 @@
-import { BreadcrumbProvider } from "@/components/providers/breadcrumb-provider";
+﻿import { BreadcrumbProvider } from "@/components/providers/breadcrumb-provider";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AppBreadcrumb } from "@/layouts/app-breadcrumb";
 import { AppHeader } from "@/layouts/app-header";
 import { AppSidebar } from "@/layouts/app-sidebar";
 import { getUserRole } from "@/lib/auth/get-user-role";
+import { createClient } from "@/lib/supabase/server";
+import { SchoolContextBanner } from "@/sections/dashboard/school-context-banner";
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
@@ -29,7 +31,19 @@ export default async function DashboardLayout({
     redirect("/auth/login");
   }
 
-  const { isParent } = userData;
+  const { user, isParent } = userData;
+  const supabase = await createClient();
+
+  const { data: roleRecord } = await supabase
+    .from("user_roles")
+    .select("schools(name, code, location, county)")
+    .eq("user_id", user.id)
+    .limit(1)
+    .maybeSingle();
+
+  const school = Array.isArray(roleRecord?.schools)
+    ? roleRecord.schools[0]
+    : roleRecord?.schools;
 
   return (
     <SidebarProvider
@@ -51,6 +65,12 @@ export default async function DashboardLayout({
               data-role={isParent ? "parent" : "staff"}
             >
               <AppBreadcrumb />
+              <SchoolContextBanner
+                schoolName={school?.name}
+                code={school?.code}
+                location={school?.location}
+                county={school?.county}
+              />
               {children}
             </div>
           </BreadcrumbProvider>
