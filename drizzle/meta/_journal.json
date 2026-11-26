@@ -211,6 +211,13 @@
       "when": 1793111892685,
       "tag": "0029_careless_newton_destine",
       "breakpoints": true
+    },
+    {
+      "idx": 30,
+      "version": "7",
+      "when": 1795700461658,
+      "tag": "0030_sharp_mad_thinker",
+      "breakpoints": true
     }
   ]
 }

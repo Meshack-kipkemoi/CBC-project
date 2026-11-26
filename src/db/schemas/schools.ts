@@ -1,4 +1,4 @@
-import { sql } from "drizzle-orm";
+﻿import { sql } from "drizzle-orm";
 import { pgTable, uuid, text, timestamp, pgPolicy } from "drizzle-orm/pg-core";
 import { authenticatedRole } from "drizzle-orm/supabase";
 import { uid } from "./rls";
@@ -10,6 +10,8 @@ export const schools = pgTable(
     id: uuid().defaultRandom().primaryKey(),
     name: text().notNull(),
     code: text().notNull().unique(),
+    location: text(),
+    county: text(),
     createdAt: timestamp("created_at", {
       withTimezone: true,
     })
@@ -21,9 +23,9 @@ export const schools = pgTable(
       for: "select",
       to: authenticatedRole,
       using: sql`exists (
-      select 1 from user_roles ur
-      where ur.school_id = schools.id
-      and ur.user_id = ${uid}
+        select 1 from user_roles ur
+        where ur.school_id = schools.id
+        and ur.user_id = ${uid}
       )`,
     }),
   ],
